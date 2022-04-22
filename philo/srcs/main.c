@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:14:34 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/22 19:27:40 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/22 22:51:22 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <limits.h>
 
-unsigned int	*ft_ato_ui(const char *nptr, unsigned int *result)
+unsigned long	*ft_ato_ui(const char *nptr, unsigned long *result)
 {
 	*result = 0;
 	while (*nptr != '\0')
@@ -29,17 +29,18 @@ unsigned int	*ft_ato_ui(const char *nptr, unsigned int *result)
 
 size_t	parse_arguments(t_program *program, int argc, char **argv)
 {
-	if (!ft_ato_ui(argv[1], &program->nbr_philo))
+	if (!ft_ato_ui(argv[1], (unsigned long *) &program->nbr_philo))
 		return (1);
-	if (!ft_ato_ui(argv[2], &program->time_to_die))
+	if (!ft_ato_ui(argv[2], (unsigned long *) &program->time_to_die))
 		return (2);
-	if (!ft_ato_ui(argv[3], &program->time_to_eat))
+	if (!ft_ato_ui(argv[3], (unsigned long *) &program->time_to_eat))
 		return (3);
-	if (!ft_ato_ui(argv[4], &program->time_to_sleep))
+	if (!ft_ato_ui(argv[4], (unsigned long *) &program->time_to_sleep))
 		return (4);
 	if (argc == 6)
 	{
-		if (!ft_ato_ui(argv[5], &program->nbr_philo_must_eat))
+		if (!ft_ato_ui(argv[5],
+				(unsigned long *) &program->nbr_philo_must_eat))
 			return (5);
 	}
 	else
@@ -85,16 +86,18 @@ int	setup_program(t_program *program, int argc, char **argv)
 	return (0);
 }
 
+void	*philo(void *s_philo)
+{
+	t_philosopher	*philo;
+
+	philo = (t_philosopher *) s_philo;
+}
+
 int	main(int argc, char **argv)
 {
 	t_program	program;
 
-	display_status(DEAD, 1234, 1);
-	display_status(THINKING, 1234, 1);
-	display_status(SLEEPING, 1234, 1);
-	display_status(EATING, 1234, 1);
-	display_status(TAKE_FORK, 1234, 1);
-//	if (setup_program(&program, argc, argv) != 0)
-//		return (1);
+	//if (setup_program(&program, argc, argv) != 0)
+	//	return (1);
 	return (0);
 }

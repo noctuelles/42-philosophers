@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/22 19:38:35 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/22 23:06:32 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <stdbool.h>
 # include <sys/time.h>
+# include <pthread.h>
 # include <stdio.h>
 
 /******************************************************************************
@@ -52,12 +53,13 @@ integer.\n"
 
 typedef struct s_program
 {
-	char		*name;
-	unsigned int nbr_philo;
-	unsigned int nbr_philo_must_eat;
-	time_t		time_to_die;
-	time_t		time_to_eat;
-	time_t		time_to_sleep;
+	char			*name;
+	pthread_t		*threads;
+	unsigned int	nbr_philo;
+	unsigned int	nbr_philo_must_eat;
+	time_t			time_to_die;
+	time_t			time_to_eat;
+	time_t			time_to_sleep;
 }				t_program;
 
 typedef enum e_philo_status
@@ -71,8 +73,12 @@ typedef enum e_philo_status
 
 typedef struct s_philosopher
 {
-	unsigned int	nbr;
-	unsigned int	last_eat;
+	unsigned int	id;
+	time_t			living_since;
+	time_t			last_meal;
+	time_t			time_to_die;
+	time_t			time_to_eat;
+	time_t			time_to_sleep;
 	t_philo_status	status;
 }				t_philosopher;
 

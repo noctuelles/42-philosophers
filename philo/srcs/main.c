@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:14:34 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/18 11:54:10 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/22 19:27:40 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,12 +73,9 @@ int	setup_program(t_program *program, int argc, char **argv)
 {
 	size_t	arg;
 
-	if (argv[0] == NULL)
-		program->name = STR_PGR_NAME;
-	else
-		program->name = argv[0];
 	if (argc < 5 || argc > 6)
 		return (printf(STR_USAGE, program->name));
+	program->name = argv[0];
 	arg = check_arguments(argc, argv);
 	if (arg != 0)
 		return (printf(STR_NOT_DIGIT, (unsigned int) arg));
@@ -92,7 +89,12 @@ int	main(int argc, char **argv)
 {
 	t_program	program;
 
-	if (setup_program(&program, argc, argv) != 0)
-		return (1);
+	display_status(DEAD, 1234, 1);
+	display_status(THINKING, 1234, 1);
+	display_status(SLEEPING, 1234, 1);
+	display_status(EATING, 1234, 1);
+	display_status(TAKE_FORK, 1234, 1);
+//	if (setup_program(&program, argc, argv) != 0)
+//		return (1);
 	return (0);
 }

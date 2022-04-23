@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:14:34 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/23 15:19:07 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/23 20:00:12 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,9 +97,15 @@ int	main(int argc, char **argv)
 {
 	t_program	program;
 
-	if (create_forks(5000) == NULL)
+	if (setup_program(&program, argc, argv) != 0)
 		return (1);
-	//if (setup_program(&program, argc, argv) != 0)
-	//	return (1);
+	program.forks = create_forks(program.nbr_philo);
+	if (!program.forks)
+		return (1);
+	program.philos = create_philos(&program);
+	if (!program.philos)
+		return (1);
+	if (!launch_philos(program.forks, program.philos, program.nbr_philo))
+		return (1);
 	return (0);
 }

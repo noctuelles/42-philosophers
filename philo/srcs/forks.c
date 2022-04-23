@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 14:55:58 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/23 15:21:55 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/23 19:05:11 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,40 +14,65 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-static void	*quit(pthread_mutex_t *forks, size_t i)
+static void	*quit(t_mutex *forks, size_t i, t_err err)
 {
 	size_t	j;
 
-	j = 0;
+	if (err == E_MALLOC)
+		ft_putstr_fd(STR_MALLOC, STDERR_FILENO);
+	else if (err == E_MUTEX)
+		ft_putstr_fd(STR_MUTEX_ERR, STDERR_FILENO);
 	if (forks)
 	{
-		ft_putstr_fd(STR_MUTEX_ERR, STDERR_FILENO);
+		j = 0;
 		while (j < i)
-			pthread_mutex_destroy(&forks[j++]);
+			pthread_mutex_destroy(forks[j++].addr);
 		free(forks);
 	}
-	else
-		ft_putstr_fd(STR_MALLOC, STDERR_FILENO);
 	return (NULL);
 }
 
 /* create_forks() returns an array of mutex.
  * If anything fails, the function print an error message and returns NULL. */
 
-pthread_mutex_t	*create_forks(unsigned int nbr_philo)
+t_mutex	*create_forks(unsigned int nbr_philo)
 {
-	pthread_mutex_t	*forks;
+	t_mutex			*forks;
 	size_t			i;
 
-	forks = (pthread_mutex_t *) malloc(nbr_philo * sizeof(pthread_mutex_t));
+	forks = (t_mutex *) malloc(nbr_philo * sizeof(t_mutex));
 	if (!forks)
-		return (quit(NULL, 0));
+		return (quit(NULL, 0, E_MALLOC));
 	i = 0;
 	while (i < nbr_philo)
 	{
-		if (pthread_mutex_init(&forks[i], NULL) != 0)
-			return (quit(forks, i));
+		forks[i].addr = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+		if (!forks[i].addr)
+			return (quit(forks, i, E_MALLOC));
+		if (pthread_mutex_init(forks[i].addr, NULL) != 0)
+			return (quit(forks, i, E_MUTEX));
 		i++;
 	}
 	return (forks);
+}
+
+void	lock_forks(t_mutex *forks, unsigned int nbr_philo)
+{
+	size_t	i;
+
+	i = 0;
+	while (i < nbr_philo)
+		pthread_mutex_lock(forks[i++].addr);
+}
+
+void	unlock_forks(t_mutex *forks, unsigned int nbr_philo)
+{
+	size_t	i;
+
+	i = 0;
+	while (i < nbr_philo)
+	{
+		if (pthread_mutex_unlock(forks[i++].addr) != 0)
+			perror("mutex");
+	}
 }

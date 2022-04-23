@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 15:22:09 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/23 15:59:06 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/23 20:48:03 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,48 @@
 #include <string.h>
 #include <unistd.h>
 
+void	philo_take_fork(t_philosopher *philo)
+{
+}
+
+int	take_forks(t_philosopher *philo)
+{
+	struct timeval	curr;
+
+	pthread_mutex_lock(philo->fork[0].addr);
+	pthread_mutex_lock(philo->fork[1].addr);
+	gettimeofday(&curr, NULL);
+	if (diff_mlsec(philo->last_meal, curr) >= philo->time_to_die)
+	{
+		display_status(philo, P_DEAD);
+		return (-1);
+	}
+}
+
 void	*philo_thread(void *arg)
 {
 	t_philosopher	*philo;
 
 	philo = (t_philosopher *) arg;
-	philo->id = 0;
+	while (1)
+	{
+		if (take_forks(philo) == -1)
+			return (NULL);
+		display_status(philo, P_TAKE_FORK);
+		display_status(philo, P_EATING);
+		usleep(philo->time_to_eat * 1000);
+
+		gettimeofday(&philo->last_meal, NULL);
+		pthread_mutex_unlock(philo->fork[0].addr);
+		pthread_mutex_unlock(philo->fork[1].addr);
+
+		display_status(philo, P_SLEEPING);
+		usleep(philo->time_to_sleep * 1e3);
+		display_status(philo, P_THINKING);
+	}
+	// philo pense et tente donc de lock ses fourchettes
+
+	//printf("Hi i'm philo %u created at %lu and %lu\n", philo->id, philo->creation.tv_sec, philo->creation.tv_usec);
 	return (NULL);
 }
 
@@ -33,16 +69,35 @@ static void	*quit(int err)
 	return (NULL);
 }
 
-t_philosopher	*launch_philos(t_philosopher *philos, unsigned int nbr_philo)
+t_philosopher	*launch_philos(t_mutex *forks, t_philosopher *philos,
+		unsigned int nbr_philo)
 {
 	size_t	i;
 
 	i = 0;
+	lock_forks(forks, nbr_philo);
 	while (i < nbr_philo)
 	{
+		gettimeofday(&philos[i].launch_time, NULL);
 		if (pthread_create(&philos[i].thread, NULL, &philo_thread,
 				&philos[i]) != 0)
 			return (quit(E_THREAD));
+		gettimeofday(&philos[i].last_meal, NULL);
+		i++;
+	}
+	i = 0;
+	unlock_forks(forks, nbr_philo);
+	while (i < nbr_philo)
+	{
+		pthread_join(philos[i].thread, &philos[i].ret);
+		size_t j = 0;
+		while (j < nbr_philo)
+		{
+			if (j != i)
+				pthread_detach(philos[j].thread);
+			j++;
+		}
+		exit(0);
 		i++;
 	}
 	return (philos);
@@ -67,8 +122,12 @@ t_philosopher	*create_philos(t_program *program)
 		philos[i].time_to_sleep = program->time_to_sleep;
 		philos[i].fork[0] = program->forks[i];
 		if (program->nbr_philo != 1)
-			philos[i].fork[1] = program->forks[i + 1];
-		philos[i].status = P_THINKING;
+		{
+			if (i == program->nbr_philo - 1)
+				philos[i].fork[1] = program->forks[0];
+			else
+				philos[i].fork[1] = program->forks[i + 1];
+		}
 		i++;
 	}
 	return (philos);

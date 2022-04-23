@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/22 23:06:32 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/23 16:04:28 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@
 # define STR_P_FORK      "has taken a fork"
 # define STR_P_THINKING  "is thinking"
 # define STR_NUL         ""
+# define NUL             0
 
 # define STR_ERROR       "error: "
 # define STR_BAD_ARG     "bad argument (%u): "
@@ -41,8 +42,12 @@
 integer.\n"
 # define STR_VAL_OVERF   STR_ERROR STR_BAD_ARG "value overflowing, max : \
 %u.\n"
+# define STR_MALLOC      "fatal: system cannot allocate memory.\n"
+# define STR_MUTEX_ERR   "fatal: mutex: system cannot create mutex.\n"
+# define STR_PTHREAD_C   "fatal: thread: insufficient ressources or\
+ system-imposed limit on the number of threads.\n"
 
-# define STR_USAGE        "usage : %s \
+# define STR_USAGE        "usage: %s \
 <number_of_philosophers> (ms) <time_to_die> (ms) \
 <time_to_eat> (ms) <time_to_sleep> (ms) \
 [number_of_times_each_philosopher_must_eat]\n"
@@ -51,10 +56,13 @@ integer.\n"
  *                              Typedef & Enum                                *
  *****************************************************************************/
 
+typedef struct s_philosopher t_philosopher;
+
 typedef struct s_program
 {
 	char			*name;
-	pthread_t		*threads;
+	pthread_mutex_t	*forks;
+	t_philosopher	*philos;
 	unsigned int	nbr_philo;
 	unsigned int	nbr_philo_must_eat;
 	time_t			time_to_die;
@@ -64,48 +72,70 @@ typedef struct s_program
 
 typedef enum e_philo_status
 {
-	TAKE_FORK,
-	EATING,
-	THINKING,
-	SLEEPING,
-	DEAD
+	P_TAKE_FORK,
+	P_EATING,
+	P_THINKING,
+	P_SLEEPING,
+	P_DEAD
 }				t_philo_status;
 
-typedef struct s_philosopher
+typedef enum e_err
+{
+	E_MALLOC = 0,
+	E_THREAD = 1
+}				t_err;
+
+struct s_philosopher
 {
 	unsigned int	id;
-	time_t			living_since;
+	pthread_t		thread;
+	pthread_mutex_t	fork[2];
+	time_t			time;
 	time_t			last_meal;
 	time_t			time_to_die;
 	time_t			time_to_eat;
 	time_t			time_to_sleep;
 	t_philo_status	status;
-}				t_philosopher;
+};
 
 /******************************************************************************
  *                            Functions Prototype                             *
  *****************************************************************************/
 
-bool	is_digit(int c);
+/* utils.c */
+
+bool			is_digit(int c);
+void			ft_putstr_fd(const char *s, int fd);
+
+/* forks.c */
+
+pthread_mutex_t	*create_forks(unsigned int nbr_philo);
+
+/* philosophers.c */
+
+t_philosopher	*create_philos(t_program *program);
+t_philosopher	*launch_philos(t_philosopher *philos, unsigned int nbr_philo);
+
+/* inline function */
 
 static inline void	display_status(t_philo_status status, time_t timestamp,
 		unsigned int philo_id)
 {
 	char	*str;
 
-	if (status == EATING)
+	if (status == P_EATING)
 		str = STR_P_EATING;
-	else if (status == SLEEPING)
+	else if (status == P_SLEEPING)
 		str = STR_P_SLEEPING;
-	else if (status == DEAD)
+	else if (status == P_DEAD)
 		str = STR_P_DIED;
-	else if (status == THINKING)
+	else if (status == P_THINKING)
 		str = STR_P_THINKING;
-	else if (status == TAKE_FORK)
+	else if (status == P_TAKE_FORK)
 		str = STR_P_FORK;
 	else
 		str = STR_NUL;
-	if (status == DEAD)
+	if (status == P_DEAD)
 		printf(STR_P_DEAD, timestamp, philo_id, str);
 	else
 		printf(STR_P, timestamp, philo_id, str);

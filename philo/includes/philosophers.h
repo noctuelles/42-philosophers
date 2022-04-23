@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/22 23:06:32 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/23 12:07:09 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ typedef enum e_philo_status
 typedef struct s_philosopher
 {
 	unsigned int	id;
+	pthread_t		thread;
 	time_t			living_since;
 	time_t			last_meal;
 	time_t			time_to_die;
@@ -87,6 +88,7 @@ typedef struct s_philosopher
  *****************************************************************************/
 
 bool	is_digit(int c);
+void	*ft_calloc(size_t nmemb, size_t size);
 
 static inline void	display_status(t_philo_status status, time_t timestamp,
 		unsigned int philo_id)

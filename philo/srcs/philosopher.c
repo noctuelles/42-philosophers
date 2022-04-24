@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 15:22:09 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/23 20:48:03 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/23 22:04:43 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ int	take_forks(t_philosopher *philo)
 		display_status(philo, P_DEAD);
 		return (-1);
 	}
+	else
+		return (0);
 }
 
 void	*philo_thread(void *arg)
@@ -40,8 +42,19 @@ void	*philo_thread(void *arg)
 	philo = (t_philosopher *) arg;
 	while (1)
 	{
-		if (take_forks(philo) == -1)
+		pthread_mutex_lock(philo->sentinel->addr);
+		if (philo->sentinel->data == 1)
+		{
+			pthread_mutex_unlock(philo->sentinel->addr);
 			return (NULL);
+		}
+		pthread_mutex_unlock(philo->sentinel->addr);
+
+		if (take_forks(philo) == -1)
+		{
+			philo->sentinel->data = 1;
+			return (NULL);
+		}
 		display_status(philo, P_TAKE_FORK);
 		display_status(philo, P_EATING);
 		usleep(philo->time_to_eat * 1000);
@@ -50,8 +63,25 @@ void	*philo_thread(void *arg)
 		pthread_mutex_unlock(philo->fork[0].addr);
 		pthread_mutex_unlock(philo->fork[1].addr);
 
+		pthread_mutex_lock(philo->sentinel->addr);
+		if (philo->sentinel->data == 1)
+		{
+			pthread_mutex_unlock(philo->sentinel->addr);
+			return (NULL);
+		}
+		pthread_mutex_unlock(philo->sentinel->addr);
+
 		display_status(philo, P_SLEEPING);
 		usleep(philo->time_to_sleep * 1e3);
+
+		pthread_mutex_lock(philo->sentinel->addr);
+		if (philo->sentinel->data == 1)
+		{
+			pthread_mutex_unlock(philo->sentinel->addr);
+			return (NULL);
+		}
+		pthread_mutex_unlock(philo->sentinel->addr);
+
 		display_status(philo, P_THINKING);
 	}
 	// philo pense et tente donc de lock ses fourchettes
@@ -90,14 +120,6 @@ t_philosopher	*launch_philos(t_mutex *forks, t_philosopher *philos,
 	while (i < nbr_philo)
 	{
 		pthread_join(philos[i].thread, &philos[i].ret);
-		size_t j = 0;
-		while (j < nbr_philo)
-		{
-			if (j != i)
-				pthread_detach(philos[j].thread);
-			j++;
-		}
-		exit(0);
 		i++;
 	}
 	return (philos);
@@ -116,6 +138,7 @@ t_philosopher	*create_philos(t_program *program)
 	while (i < program->nbr_philo)
 	{
 		memset(&philos[i], NUL, sizeof(t_philosopher));
+		philos[i].sentinel = &program->sentinel;
 		philos[i].id = i + 1;
 		philos[i].time_to_die = program->time_to_die;
 		philos[i].time_to_eat = program->time_to_eat;

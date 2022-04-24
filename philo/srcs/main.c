@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:14:34 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/23 20:00:12 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/23 21:59:40 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,8 @@ int	setup_program(t_program *program, int argc, char **argv)
 	arg = parse_arguments(program, argc, argv);
 	if (arg != 0)
 		return (printf(STR_VAL_OVERF, (unsigned int) arg, INT_MAX));
+	pthread_mutex_init(program->sentinel.addr, NULL);
+	program->sentinel.data = 0;
 	return (0);
 }
 

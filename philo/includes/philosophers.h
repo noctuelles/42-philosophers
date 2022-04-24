@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/23 20:51:00 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/23 21:55:52 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ typedef struct s_philosopher t_philosopher;
 
 typedef struct	e_mutex
 {
+	unsigned int	data;
 	pthread_mutex_t	*addr;
 }				t_mutex;
 
@@ -67,6 +68,7 @@ typedef struct s_program
 	char			*name;
 	t_mutex			*forks;
 	t_philosopher	*philos;
+	t_mutex			sentinel;
 	unsigned int	nbr_philo;
 	unsigned int	nbr_philo_must_eat;
 	time_t			time_to_die;
@@ -95,6 +97,7 @@ struct s_philosopher
 	unsigned int	id;
 	pthread_t		thread;
 	t_mutex			fork[2];
+	t_mutex			*sentinel;
 	void			*ret;
 	struct timeval	last_meal;
 	time_t			time_to_die;

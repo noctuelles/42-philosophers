@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:23:50 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/23 15:08:28 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/24 13:51:26 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "philosophers.h"
+#include <stdlib.h>
 
 bool	is_digit(int c)
 {

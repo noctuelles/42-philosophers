@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/24 13:52:17 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/25 17:56:25 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 /******************************************************************************
  *                                  Macros                                    *
  *****************************************************************************/
+
+# define STR_DF_NAME     "./philo"
 
 # define STR_P           "\x1b[96m%-10lu\x1b[0m \x1b[93;1m%5u\x1b[0m \
 \x1b[1m%20s\x1b[0m\n"
@@ -59,7 +61,7 @@ typedef struct s_philosopher t_philosopher;
 
 typedef struct	e_mutex
 {
-	unsigned int	data;
+	void			*data;
 	pthread_mutex_t	*addr;
 }				t_mutex;
 
@@ -67,8 +69,10 @@ typedef struct s_program
 {
 	char			*name;
 	t_mutex			*forks;
+	t_mutex			timestamp_mutex;
+	t_mutex			msg_mutex;
+	t_mutex			philo_died;
 	t_philosopher	*philos;
-	t_mutex			sentinel;
 	unsigned int	nbr_philo;
 	unsigned int	nbr_philo_must_eat;
 	time_t			time_to_die;
@@ -97,8 +101,9 @@ struct s_philosopher
 	unsigned int	id;
 	pthread_t		thread;
 	t_mutex			fork[2];
-	t_mutex			*sentinel;
-	void			*ret;
+	t_mutex			*msg_mutex;
+	t_mutex			*timestamp_mutex;
+	t_mutex			*philo_died;
 	struct timeval	last_meal;
 	time_t			time_to_die;
 	time_t			time_to_eat;
@@ -128,8 +133,8 @@ void	printf_forks_addr(pthread_mutex_t *forks, unsigned int nbr_philo);
 /* philosophers.c */
 
 t_philosopher	*create_philos(t_program *program);
-t_philosopher	*launch_philos(t_mutex *forks, t_philosopher *philos,
-		unsigned int nbr_philo);
+
+t_philosopher	*launch_philos(t_program *program);
 
 /* time_utils.c */
 
@@ -140,8 +145,9 @@ time_t	diff_mlsec(struct timeval t1, struct timeval t2);
 static inline void	display_status(t_philosopher *philo, t_philo_status status)
 {
 	char			*str;
-	struct timeval	curr_time;
+	struct timeval	curr;
 
+	pthread_mutex_lock(philo->msg_mutex->addr);
 	if (status == P_EATING)
 		str = STR_P_EATING;
 	else if (status == P_SLEEPING)
@@ -154,11 +160,14 @@ static inline void	display_status(t_philosopher *philo, t_philo_status status)
 		str = STR_P_FORK;
 	else
 		str = STR_NUL;
-	gettimeofday(&curr_time, NULL);
+	pthread_mutex_lock(philo->timestamp_mutex->addr);
+	gettimeofday(&curr, NULL);
 	if (status == P_DEAD)
-		printf(STR_P_DEAD, diff_mlsec(philo->launch_time, curr_time), philo->id, str);
+		printf(STR_P_DEAD, diff_mlsec(*(struct timeval *)philo->timestamp_mutex->data, curr), philo->id, str);
 	else
-		printf(STR_P, diff_mlsec(philo->launch_time, curr_time), philo->id, str);
+		printf(STR_P, diff_mlsec(*(struct timeval *)philo->timestamp_mutex->data, curr), philo->id, str);
+	pthread_mutex_unlock(philo->timestamp_mutex->addr);
+	pthread_mutex_unlock(philo->msg_mutex->addr);
 }
 
 #endif

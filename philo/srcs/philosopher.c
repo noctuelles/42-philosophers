@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 15:22:09 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/23 22:04:43 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/25 18:05:03 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,72 +15,27 @@
 #include <string.h>
 #include <unistd.h>
 
-void	philo_take_fork(t_philosopher *philo)
-{
-}
-
-int	take_forks(t_philosopher *philo)
-{
-	struct timeval	curr;
-
-	pthread_mutex_lock(philo->fork[0].addr);
-	pthread_mutex_lock(philo->fork[1].addr);
-	gettimeofday(&curr, NULL);
-	if (diff_mlsec(philo->last_meal, curr) >= philo->time_to_die)
-	{
-		display_status(philo, P_DEAD);
-		return (-1);
-	}
-	else
-		return (0);
-}
-
 void	*philo_thread(void *arg)
 {
 	t_philosopher	*philo;
 
 	philo = (t_philosopher *) arg;
+
 	while (1)
 	{
-		pthread_mutex_lock(philo->sentinel->addr);
-		if (philo->sentinel->data == 1)
-		{
-			pthread_mutex_unlock(philo->sentinel->addr);
-			return (NULL);
-		}
-		pthread_mutex_unlock(philo->sentinel->addr);
-
-		if (take_forks(philo) == -1)
-		{
-			philo->sentinel->data = 1;
-			return (NULL);
-		}
+		pthread_mutex_lock(philo->fork[0].addr);
 		display_status(philo, P_TAKE_FORK);
+		pthread_mutex_lock(philo->fork[1].addr);
+		display_status(philo, P_TAKE_FORK);
+
 		display_status(philo, P_EATING);
 		usleep(philo->time_to_eat * 1000);
 
-		gettimeofday(&philo->last_meal, NULL);
 		pthread_mutex_unlock(philo->fork[0].addr);
 		pthread_mutex_unlock(philo->fork[1].addr);
 
-		pthread_mutex_lock(philo->sentinel->addr);
-		if (philo->sentinel->data == 1)
-		{
-			pthread_mutex_unlock(philo->sentinel->addr);
-			return (NULL);
-		}
-		pthread_mutex_unlock(philo->sentinel->addr);
-
 		display_status(philo, P_SLEEPING);
-		usleep(philo->time_to_sleep * 1e3);
-
-		pthread_mutex_lock(philo->sentinel->addr);
-		if (philo->sentinel->data == 1)
-		{
-			pthread_mutex_unlock(philo->sentinel->addr);
-			return (NULL);
-		}
-		pthread_mutex_unlock(philo->sentinel->addr);
+		usleep(philo->time_to_sleep * 1000);
 
 		display_status(philo, P_THINKING);
 	}
@@ -99,30 +54,26 @@ static void	*quit(int err)
 	return (NULL);
 }
 
-t_philosopher	*launch_philos(t_mutex *forks, t_philosopher *philos,
-		unsigned int nbr_philo)
+t_philosopher	*launch_philos(t_program *program)
 {
 	size_t	i;
 
 	i = 0;
-	lock_forks(forks, nbr_philo);
-	while (i < nbr_philo)
+	gettimeofday(program->timestamp_mutex.data, NULL);
+	while (i < program->nbr_philo)
 	{
-		gettimeofday(&philos[i].launch_time, NULL);
-		if (pthread_create(&philos[i].thread, NULL, &philo_thread,
-				&philos[i]) != 0)
+		if (pthread_create(&program->philos[i].thread, NULL, &philo_thread,
+				&program->philos[i]) != 0)
 			return (quit(E_THREAD));
-		gettimeofday(&philos[i].last_meal, NULL);
 		i++;
 	}
 	i = 0;
-	unlock_forks(forks, nbr_philo);
-	while (i < nbr_philo)
+	while (i < program->nbr_philo)
 	{
-		pthread_join(philos[i].thread, &philos[i].ret);
+		pthread_join(program->philos[i].thread, NULL);
 		i++;
 	}
-	return (philos);
+	return (program->philos);
 }
 
 t_philosopher	*create_philos(t_program *program)
@@ -138,7 +89,9 @@ t_philosopher	*create_philos(t_program *program)
 	while (i < program->nbr_philo)
 	{
 		memset(&philos[i], NUL, sizeof(t_philosopher));
-		philos[i].sentinel = &program->sentinel;
+		philos[i].msg_mutex = &program->msg_mutex;
+		philos[i].timestamp_mutex = &program->timestamp_mutex;
+		philos[i].philo_died = &program->philo_died;
 		philos[i].id = i + 1;
 		philos[i].time_to_die = program->time_to_die;
 		philos[i].time_to_eat = program->time_to_eat;
@@ -150,6 +103,14 @@ t_philosopher	*create_philos(t_program *program)
 				philos[i].fork[1] = program->forks[0];
 			else
 				philos[i].fork[1] = program->forks[i + 1];
+		}
+		if ((i + 1) % 2 != 0)
+		{
+			t_mutex swap;
+
+			swap = philos[i].fork[0];
+			philos[i].fork[0] = philos[i].fork[1];
+			philos[i].fork[1] = swap;
 		}
 		i++;
 	}

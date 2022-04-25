@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:14:34 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/23 21:59:40 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/25 17:02:45 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,10 @@ int	setup_program(t_program *program, int argc, char **argv)
 {
 	size_t	arg;
 
+	if (argv[0])
+		program->name = argv[0];
+	else
+		program->name = STR_DF_NAME;
 	if (argc < 5 || argc > 6)
 		return (printf(STR_USAGE, program->name));
 	program->name = argv[0];
@@ -83,16 +87,22 @@ int	setup_program(t_program *program, int argc, char **argv)
 	arg = parse_arguments(program, argc, argv);
 	if (arg != 0)
 		return (printf(STR_VAL_OVERF, (unsigned int) arg, INT_MAX));
-	pthread_mutex_init(program->sentinel.addr, NULL);
-	program->sentinel.data = 0;
 	return (0);
 }
 
-void	*philo(void *s_philo)
+int	create_global_mutex(t_program *program)
 {
-	t_philosopher	*philo;
+	program->msg_mutex.addr = (pthread_mutex_t *)
+		malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(program->msg_mutex.addr, NULL);
 
-	philo = (t_philosopher *) s_philo;
+	program->timestamp_mutex.addr = (pthread_mutex_t *)
+		malloc(sizeof(pthread_mutex_t));
+	program->timestamp_mutex.data = (struct timeval *)
+		malloc(sizeof(struct timeval *));
+	pthread_mutex_init(program->timestamp_mutex.addr, NULL);
+
+	return (0);
 }
 
 int	main(int argc, char **argv)
@@ -107,7 +117,8 @@ int	main(int argc, char **argv)
 	program.philos = create_philos(&program);
 	if (!program.philos)
 		return (1);
-	if (!launch_philos(program.forks, program.philos, program.nbr_philo))
+	create_global_mutex(&program);
+	if (!launch_philos(&program))
 		return (1);
 	return (0);
 }

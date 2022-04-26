@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/25 17:56:25 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/26 18:29:46 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <sys/time.h>
 # include <pthread.h>
 # include <stdio.h>
+# include <stdint.h>
 
 /******************************************************************************
  *                                  Macros                                    *
@@ -69,7 +70,7 @@ typedef struct s_program
 {
 	char			*name;
 	t_mutex			*forks;
-	t_mutex			timestamp_mutex;
+	uint64_t		start_time;
 	t_mutex			msg_mutex;
 	t_mutex			philo_died;
 	t_philosopher	*philos;
@@ -102,7 +103,7 @@ struct s_philosopher
 	pthread_t		thread;
 	t_mutex			fork[2];
 	t_mutex			*msg_mutex;
-	t_mutex			*timestamp_mutex;
+	uint64_t		*start_time;
 	t_mutex			*philo_died;
 	struct timeval	last_meal;
 	time_t			time_to_die;
@@ -139,35 +140,13 @@ t_philosopher	*launch_philos(t_program *program);
 /* time_utils.c */
 
 time_t	diff_mlsec(struct timeval t1, struct timeval t2);
+void	smart_sleep(unsigned int mlsec);
 
 /* inline function */
 
-static inline void	display_status(t_philosopher *philo, t_philo_status status)
-{
-	char			*str;
-	struct timeval	curr;
+void	display_status(t_philosopher *philo, char *str);
+void	ft_sleep_t(size_t ms);
 
-	pthread_mutex_lock(philo->msg_mutex->addr);
-	if (status == P_EATING)
-		str = STR_P_EATING;
-	else if (status == P_SLEEPING)
-		str = STR_P_SLEEPING;
-	else if (status == P_DEAD)
-		str = STR_P_DIED;
-	else if (status == P_THINKING)
-		str = STR_P_THINKING;
-	else if (status == P_TAKE_FORK)
-		str = STR_P_FORK;
-	else
-		str = STR_NUL;
-	pthread_mutex_lock(philo->timestamp_mutex->addr);
-	gettimeofday(&curr, NULL);
-	if (status == P_DEAD)
-		printf(STR_P_DEAD, diff_mlsec(*(struct timeval *)philo->timestamp_mutex->data, curr), philo->id, str);
-	else
-		printf(STR_P, diff_mlsec(*(struct timeval *)philo->timestamp_mutex->data, curr), philo->id, str);
-	pthread_mutex_unlock(philo->timestamp_mutex->addr);
-	pthread_mutex_unlock(philo->msg_mutex->addr);
-}
+uint64_t	get_mlsec_time(void);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 15:22:09 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/25 18:05:03 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/26 18:53:40 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,24 +20,25 @@ void	*philo_thread(void *arg)
 	t_philosopher	*philo;
 
 	philo = (t_philosopher *) arg;
-
+	if (philo->id % 2 == 0)
+		ft_sleep_t(50);
 	while (1)
 	{
 		pthread_mutex_lock(philo->fork[0].addr);
-		display_status(philo, P_TAKE_FORK);
+		display_status(philo, STR_P_FORK);
 		pthread_mutex_lock(philo->fork[1].addr);
-		display_status(philo, P_TAKE_FORK);
+		display_status(philo, STR_P_FORK);
 
-		display_status(philo, P_EATING);
-		usleep(philo->time_to_eat * 1000);
+		display_status(philo, STR_P_EATING);
+		ft_sleep_t(philo->time_to_eat);
 
 		pthread_mutex_unlock(philo->fork[0].addr);
 		pthread_mutex_unlock(philo->fork[1].addr);
 
-		display_status(philo, P_SLEEPING);
-		usleep(philo->time_to_sleep * 1000);
+		display_status(philo, STR_P_SLEEPING);
+		ft_sleep_t(philo->time_to_sleep);
 
-		display_status(philo, P_THINKING);
+		display_status(philo, STR_P_THINKING);
 	}
 	// philo pense et tente donc de lock ses fourchettes
 
@@ -59,7 +60,7 @@ t_philosopher	*launch_philos(t_program *program)
 	size_t	i;
 
 	i = 0;
-	gettimeofday(program->timestamp_mutex.data, NULL);
+	program->start_time = get_mlsec_time();
 	while (i < program->nbr_philo)
 	{
 		if (pthread_create(&program->philos[i].thread, NULL, &philo_thread,
@@ -90,7 +91,7 @@ t_philosopher	*create_philos(t_program *program)
 	{
 		memset(&philos[i], NUL, sizeof(t_philosopher));
 		philos[i].msg_mutex = &program->msg_mutex;
-		philos[i].timestamp_mutex = &program->timestamp_mutex;
+		philos[i].start_time = &program->start_time;
 		philos[i].philo_died = &program->philo_died;
 		philos[i].id = i + 1;
 		philos[i].time_to_die = program->time_to_die;
@@ -104,14 +105,14 @@ t_philosopher	*create_philos(t_program *program)
 			else
 				philos[i].fork[1] = program->forks[i + 1];
 		}
-		if ((i + 1) % 2 != 0)
+		/*if ((i + 1) % 2 != 0)
 		{
 			t_mutex swap;
 
 			swap = philos[i].fork[0];
 			philos[i].fork[0] = philos[i].fork[1];
 			philos[i].fork[1] = swap;
-		}
+		}*/
 		i++;
 	}
 	return (philos);

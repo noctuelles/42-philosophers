@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:14:34 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/25 17:02:45 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/26 15:14:50 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,13 +95,6 @@ int	create_global_mutex(t_program *program)
 	program->msg_mutex.addr = (pthread_mutex_t *)
 		malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(program->msg_mutex.addr, NULL);
-
-	program->timestamp_mutex.addr = (pthread_mutex_t *)
-		malloc(sizeof(pthread_mutex_t));
-	program->timestamp_mutex.data = (struct timeval *)
-		malloc(sizeof(struct timeval *));
-	pthread_mutex_init(program->timestamp_mutex.addr, NULL);
-
 	return (0);
 }
 

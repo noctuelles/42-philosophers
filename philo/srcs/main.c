@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:14:34 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/27 12:38:38 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/03 13:10:44 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,9 +92,9 @@ int	setup_program(t_program *program, int argc, char **argv)
 
 int	create_global_mutex(t_program *program)
 {
-	program->msg_mutex.addr = (pthread_mutex_t *)
+	program->mutex_msg.addr = (pthread_mutex_t *)
 		malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(program->msg_mutex.addr, NULL);
+	pthread_mutex_init(program->mutex_msg.addr, NULL);
 	return (0);
 }
 
@@ -104,14 +104,14 @@ int	main(int argc, char **argv)
 
 	if (setup_program(&program, argc, argv) != 0)
 		return (1);
-	program.forks = create_forks(program.nbr_philo);
-	if (!program.forks)
+	program.mutex_forks = create_forks(program.nbr_philo);
+	if (!program.mutex_forks)
 		return (1);
 	program.philos = create_philos(&program);
 	if (!program.philos)
 		return (1);
 	create_global_mutex(&program);
-	program.philo_died.data = 0;
+	program.mutex_simulation_stop.data = 0;
 	if (!launch_philos(&program))
 		return (1);
 	return (0);

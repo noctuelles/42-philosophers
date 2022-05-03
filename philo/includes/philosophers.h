@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/02 10:19:44 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/03 14:10:37 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,8 +74,7 @@ typedef struct s_program
 	t_mutex			mutex_msg;
 	t_mutex			mutex_simulation_stop;
 	t_philosopher	*philos;
-	t_program_mutex	mutexs;
-	volatile time_t	start_time;
+	time_t			start_time;
 	unsigned int	nbr_philo;
 	unsigned int	nbr_philo_must_eat;
 	time_t			time_to_die;
@@ -106,7 +105,7 @@ struct s_philosopher
 	t_mutex			fork[2];
 	t_mutex			*mutex_msg;
 	t_mutex			*mutex_simulation_stop;
-	volatile time_t	*start_time;
+	time_t			start_time;
 	time_t			last_meal;
 	time_t			time_to_die;
 	time_t			time_to_eat;
@@ -153,5 +152,9 @@ void		display_status(t_philosopher *philo, char *str);
 time_t	get_mlsec_time(void);
 void		precise_sleep(uint64_t ms);
 int		philo_precise_sleep(t_philosopher *philo, time_t ms);
+
+/* master_thread.c */
+
+void	*master_routine(void *arg);
 
 #endif

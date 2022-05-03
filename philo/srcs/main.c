@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:14:34 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/26 15:14:50 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/27 12:38:38 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,6 +111,7 @@ int	main(int argc, char **argv)
 	if (!program.philos)
 		return (1);
 	create_global_mutex(&program);
+	program.philo_died.data = 0;
 	if (!launch_philos(&program))
 		return (1);
 	return (0);

@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 14:55:58 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/26 11:20:25 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/02 10:17:11 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,12 +49,15 @@ t_mutex	*create_forks(unsigned int nbr_philo)
 		forks[i].addr = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
 		if (!forks[i].addr)
 			return (quit(forks, i, E_MALLOC));
+		forks[i].data = 0;
 		if (pthread_mutex_init(forks[i].addr, NULL) != 0)
 			return (quit(forks, i, E_MUTEX));
 		i++;
 	}
 	return (forks);
 }
+
+/* lock_forks() lock all mutex. */
 
 void	lock_forks(t_mutex *forks, unsigned int nbr_philo)
 {
@@ -65,14 +68,13 @@ void	lock_forks(t_mutex *forks, unsigned int nbr_philo)
 		pthread_mutex_lock(forks[i++].addr);
 }
 
+/* unlock_forks() unlock all mutex. */
+
 void	unlock_forks(t_mutex *forks, unsigned int nbr_philo)
 {
 	size_t	i;
 
 	i = 0;
 	while (i < nbr_philo)
-	{
-		if (pthread_mutex_unlock(forks[i++].addr) != 0)
-			perror("mutex");
-	}
+		pthread_mutex_unlock(forks[i++].addr);
 }

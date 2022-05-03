@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/26 18:29:46 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/02 10:19:44 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,18 +62,20 @@ typedef struct s_philosopher t_philosopher;
 
 typedef struct	e_mutex
 {
-	void			*data;
-	pthread_mutex_t	*addr;
+	volatile uint64_t	data;
+	pthread_mutex_t		*addr;
 }				t_mutex;
 
 typedef struct s_program
 {
 	char			*name;
-	t_mutex			*forks;
-	uint64_t		start_time;
-	t_mutex			msg_mutex;
-	t_mutex			philo_died;
+	pthread_t		master_thread;
+	t_mutex			*mutex_forks;
+	t_mutex			mutex_msg;
+	t_mutex			mutex_simulation_stop;
 	t_philosopher	*philos;
+	t_program_mutex	mutexs;
+	volatile time_t	start_time;
 	unsigned int	nbr_philo;
 	unsigned int	nbr_philo_must_eat;
 	time_t			time_to_die;
@@ -102,10 +104,10 @@ struct s_philosopher
 	unsigned int	id;
 	pthread_t		thread;
 	t_mutex			fork[2];
-	t_mutex			*msg_mutex;
-	uint64_t		*start_time;
-	t_mutex			*philo_died;
-	struct timeval	last_meal;
+	t_mutex			*mutex_msg;
+	t_mutex			*mutex_simulation_stop;
+	volatile time_t	*start_time;
+	time_t			last_meal;
 	time_t			time_to_die;
 	time_t			time_to_eat;
 	time_t			time_to_sleep;
@@ -134,7 +136,7 @@ void	printf_forks_addr(pthread_mutex_t *forks, unsigned int nbr_philo);
 /* philosophers.c */
 
 t_philosopher	*create_philos(t_program *program);
-
+bool	is_all_philo_alive(t_philosopher *philo);
 t_philosopher	*launch_philos(t_program *program);
 
 /* time_utils.c */
@@ -142,11 +144,14 @@ t_philosopher	*launch_philos(t_program *program);
 time_t	diff_mlsec(struct timeval t1, struct timeval t2);
 void	smart_sleep(unsigned int mlsec);
 
-/* inline function */
+/* display.c */
 
-void	display_status(t_philosopher *philo, char *str);
-void	ft_sleep_t(size_t ms);
+void		display_status(t_philosopher *philo, char *str);
 
-uint64_t	get_mlsec_time(void);
+/* time_utils.c */
+
+time_t	get_mlsec_time(void);
+void		precise_sleep(uint64_t ms);
+int		philo_precise_sleep(t_philosopher *philo, time_t ms);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 19:45:02 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/26 18:52:58 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/04/30 14:14:47 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-uint64_t	get_mlsec_time(void)
+time_t	get_mlsec_time(void)
 {
 	struct timeval	tv;
 
@@ -25,30 +25,27 @@ uint64_t	get_mlsec_time(void)
 	return ((tv.tv_sec * 1000 + tv.tv_usec / 1000));
 }
 
-unsigned int	ft_time(void)
+void	precise_sleep(uint64_t ms)
 {
-	struct timeval	tv;
+	time_t	wake_up_time;
 
-	gettimeofday(&tv, NULL);
-	return ((tv.tv_sec * 1000 + tv.tv_usec / 1000));
-}
-
-void	ft_sleep_t(size_t ms)
-{
-	unsigned int	curr;
-	unsigned int	end;
-
-	curr = ft_time();
-	end = curr + ms;
-	while (ft_time() < end)
+	wake_up_time = get_mlsec_time() + ms;
+	while (get_mlsec_time() < wake_up_time)
 		usleep(100);
 }
 
-void	display_status(t_philosopher *philo, char *str)
+int	philo_precise_sleep(t_philosopher *philo, time_t ms)
 {
-	pthread_mutex_lock(philo->msg_mutex->addr);
-	printf(STR_P, get_mlsec_time() - *(philo->start_time), philo->id, str);
-	pthread_mutex_unlock(philo->msg_mutex->addr);
+	time_t	wake_up_time;
+
+	wake_up_time = get_mlsec_time() + ms;
+	while (get_mlsec_time() < wake_up_time)
+	{
+		if (is_all_philo_alive(philo) == false)
+			return (-1);
+		usleep(100);
+	}
+	return (0);
 }
 
 /*bool	can_sleep(struct timeval schedule_time)

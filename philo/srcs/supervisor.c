@@ -6,7 +6,7 @@
 /*   By: plouvel <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/03 12:25:26 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/05 16:26:13 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/05 23:33:04 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,45 +25,55 @@ bool	is_someone_died(t_mutex *mutex_simulation_stop)
 	return (ret);
 }
 
+static bool	is_philo_dying(t_philosopher *philo)
+{
+	time_t	curr_time;
+
+	curr_time = get_mlsec_time();
+	if (curr_time >= philo->time_of_death)
+	{
+		set_mutex(philo->mutex_simulation_stop, 1);
+		pthread_mutex_lock(philo->mutex_msg->addr);
+		printf(STR_P, curr_time - philo->start_time, philo->id,
+			STR_P_DIED);
+		pthread_mutex_unlock(philo->mutex_msg->addr);
+		pthread_mutex_unlock(philo->mutex_eating.addr);
+		return (true);
+	}
+	return (false);
+}
+
+void	ready_set_go(time_t start_time)
+{
+	while (get_mlsec_time() < start_time)
+		;
+}
+
 void	*supervisor_routine(void *arg)
 {
 	t_program		*program;
 	t_philosopher	*philo;
-	size_t		i;
+	bool			everyone_ate_enough;
+	size_t			i;
 
 	program = (t_program *) arg;
-	while (get_mlsec_time() < program->start_time)
-		;
+	ready_set_go(program->start_time);
 	while (true)
 	{
 		i = 0;
+		everyone_ate_enough = true;
 		while (i < program->nbr_philo)
 		{
-			bool test = false;
-			philo = &program->philos[i];
-			pthread_mutex_lock(philo->mutex_time_of_death.addr);
-			if (get_mlsec_time() >= (time_t) philo->mutex_time_of_death.data)
-			{
-				set_mutex(philo->mutex_simulation_stop, 1);
-				pthread_mutex_lock(philo->mutex_msg->addr);
-				printf(STR_P, get_mlsec_time() - philo->start_time, philo->id,
-						STR_P_DIED);
-				pthread_mutex_unlock(philo->mutex_msg->addr);
-				test = true;
-			}
-			if (philo->meal_max != 0)
-			{
-				if (philo->meal_ate == philo->meal_max)
-				{
-					set_mutex(philo->mutex_simulation_stop, 1);
-					test = true;
-				}
-			}
-			pthread_mutex_unlock(philo->mutex_time_of_death.addr);
-			if (test)
+			philo = &program->philos[i++];
+			pthread_mutex_lock(philo->mutex_eating.addr);
+			if (is_philo_dying(philo))
 				return (NULL);
-			i++;
+			if (philo->meal_ate < philo->meal_max)
+				everyone_ate_enough = false;
+			pthread_mutex_unlock(philo->mutex_eating.addr);
 		}
+		if (everyone_ate_enough && philo->meal_max != 0)
+			return (set_mutex(philo->mutex_simulation_stop, 1));
 	}
 	return (NULL);
 }

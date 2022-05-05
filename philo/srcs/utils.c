@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:23:50 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/05 15:27:10 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/05 23:35:30 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,10 @@ bool	is_digit(int c)
 		return (false);
 }
 
-size_t	ft_strlen(const char *s)
+static size_t	ft_strlen(const char *s)
 {
 	size_t	i;
-	
+
 	i = 0;
 	while (s[i] != '\0')
 		i++;
@@ -41,9 +41,20 @@ void	ft_putstr_fd(const char *s, int fd)
 	write(fd, s, ft_strlen(s));
 }
 
-void	set_mutex(t_mutex *mutex, uint64_t value)
+void	*set_mutex(t_mutex *mutex, uint64_t value)
 {
 	pthread_mutex_lock(mutex->addr);
 	mutex->data = value;
 	pthread_mutex_unlock(mutex->addr);
+	return (NULL);
+}
+
+void	display_status(t_philosopher *philo, char *str)
+{
+	pthread_mutex_lock(philo->mutex_msg->addr);
+	pthread_mutex_lock (philo->mutex_simulation_stop->addr);
+	if (philo->mutex_simulation_stop->data != 1)
+		printf(STR_P, get_mlsec_time() - philo->start_time, philo->id, str);
+	pthread_mutex_unlock (philo->mutex_simulation_stop->addr);
+	pthread_mutex_unlock(philo->mutex_msg->addr);
 }

@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/05 16:14:35 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/05 23:18:56 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,12 +44,12 @@
 # define STR_NUL         ""
 # define NUL             0
 
-# define STR_ERROR       "error: "
-# define STR_BAD_ARG     "bad argument (%u): "
-# define STR_NOT_DIGIT   STR_ERROR STR_BAD_ARG "not a valid positive unsigned \
-integer.\n"
-# define STR_VAL_OVERF   STR_ERROR STR_BAD_ARG "value overflowing, max : \
+# define STR_NOT_DIGIT   "error: bad argument (%u): not a valid positive \
+unsigned integer.\n"
+# define STR_VAL_OVERF   "error: bad argument (%u): value overflowing, max : \
 %u.\n"
+# define STR_PHIL_OVERF  "error: bad argument (%u): maximum number of \
+philosophers reached.\n"
 # define STR_MALLOC      "fatal: system cannot allocate memory.\n"
 # define STR_MUTEX_ERR   "fatal: mutex: system cannot create mutex.\n"
 # define STR_PTHREAD_C   "fatal: thread: insufficient ressources or\
@@ -59,6 +59,8 @@ integer.\n"
 <number_of_philosophers> (ms) <time_to_die> (ms) \
 <time_to_eat> (ms) <time_to_sleep> (ms) \
 [number_of_times_each_philosopher_must_eat]\n"
+
+# define PHILO_HARD_LIMIT 1000
 
 /******************************************************************************
  *                              Typedef & Enum                                *
@@ -113,8 +115,9 @@ struct s_philosopher
 	t_mutex			fork[2];
 	t_mutex			*mutex_msg;
 	t_mutex			*mutex_simulation_stop;
-	t_mutex			mutex_time_of_death;
+	t_mutex			mutex_eating;
 	time_t			start_time;
+	time_t			time_of_death;
 	time_t			time_to_die;
 	time_t			time_to_eat;
 	time_t			time_to_sleep;
@@ -129,7 +132,7 @@ struct s_philosopher
 
 bool			is_digit(int c);
 void			ft_putstr_fd(const char *s, int fd);
-void			set_mutex(t_mutex *mutex, uint64_t value);
+void			*set_mutex(t_mutex *mutex, uint64_t value);
 
 /* forks.c */
 
@@ -152,9 +155,15 @@ time_t			get_mlsec_time(void);
 void			precise_sleep(uint64_t ms);
 int				philo_precise_sleep(t_philosopher *philo, time_t ms);
 
-/* master_thread.c */
+/* supervisor.c */
 
+void			ready_set_go(time_t start_time);
 bool			is_someone_died(t_mutex *mutex_simulation_stop);
 void			*supervisor_routine(void *arg);
+
+/* parsing.c */
+
+size_t			check_arguments(int argc, char **argv);
+size_t			parse_arguments(t_program *program, int argc, char **argv);
 
 #endif

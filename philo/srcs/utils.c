@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:23:50 by plouvel           #+#    #+#             */
-/*   Updated: 2022/04/24 13:51:26 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/05 15:27:10 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,4 +39,11 @@ void	ft_putstr_fd(const char *s, int fd)
 	if (!s)
 		return ;
 	write(fd, s, ft_strlen(s));
+}
+
+void	set_mutex(t_mutex *mutex, uint64_t value)
+{
+	pthread_mutex_lock(mutex->addr);
+	mutex->data = value;
+	pthread_mutex_unlock(mutex->addr);
 }

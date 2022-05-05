@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/03 14:10:37 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/05 16:14:35 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,16 @@
 
 # define STR_DF_NAME     "./philo"
 
+#ifndef SIMPLE
 # define STR_P           "\x1b[96m%-10lu\x1b[0m \x1b[93;1m%5u\x1b[0m \
 \x1b[1m%20s\x1b[0m\n"
 # define STR_P_DEAD      "\x1b[96m%-10lu\x1b[0m \x1b[93;1m%5u\x1b[0m \
 \x1b[1m%25s\x1b[0m\n"
+#else
+# define STR_P           "%lu %u %s\n"
+# define STR_P_DEAD      "\x1b[96m%-10lu\x1b[0m \x1b[93;1m%5u\x1b[0m \
+\x1b[1m%25s\x1b[0m\n"
+#endif
 
 # define STR_P_EATING    "is eating"
 # define STR_P_SLEEPING  "is sleeping"
@@ -62,24 +68,24 @@ typedef struct s_philosopher t_philosopher;
 
 typedef struct	e_mutex
 {
-	volatile uint64_t	data;
+	uint64_t			data;
 	pthread_mutex_t		*addr;
 }				t_mutex;
 
 typedef struct s_program
 {
 	char			*name;
-	pthread_t		master_thread;
+	pthread_t		supervisor_thread;
 	t_mutex			*mutex_forks;
 	t_mutex			mutex_msg;
 	t_mutex			mutex_simulation_stop;
 	t_philosopher	*philos;
-	time_t			start_time;
 	unsigned int	nbr_philo;
 	unsigned int	nbr_philo_must_eat;
-	time_t			time_to_die;
-	time_t			time_to_eat;
-	time_t			time_to_sleep;
+	unsigned int	time_to_die;
+	unsigned int	time_to_eat;
+	unsigned int	time_to_sleep;
+	time_t			start_time;
 }				t_program;
 
 typedef enum e_philo_status
@@ -101,17 +107,18 @@ typedef enum e_err
 struct s_philosopher
 {
 	unsigned int	id;
+	unsigned int	meal_max;
+	unsigned int	meal_ate;
 	pthread_t		thread;
 	t_mutex			fork[2];
 	t_mutex			*mutex_msg;
 	t_mutex			*mutex_simulation_stop;
+	t_mutex			mutex_time_of_death;
 	time_t			start_time;
-	time_t			last_meal;
 	time_t			time_to_die;
 	time_t			time_to_eat;
 	time_t			time_to_sleep;
 	struct timeval	launch_time;
-	t_philo_status	status;
 };
 
 /******************************************************************************
@@ -122,26 +129,18 @@ struct s_philosopher
 
 bool			is_digit(int c);
 void			ft_putstr_fd(const char *s, int fd);
+void			set_mutex(t_mutex *mutex, uint64_t value);
 
 /* forks.c */
 
 t_mutex	*create_forks(unsigned int nbr_philo);
-
-void	lock_forks(t_mutex *forks, unsigned int nbr_philo);
-void	unlock_forks(t_mutex *forks, unsigned int nbr_philo);
-
-void	printf_forks_addr(pthread_mutex_t *forks, unsigned int nbr_philo);
+void	destroy_forks(t_mutex *forks, unsigned int nbr_philo);
 
 /* philosophers.c */
 
 t_philosopher	*create_philos(t_program *program);
-bool	is_all_philo_alive(t_philosopher *philo);
+void			destroy_philos(t_philosopher *philos, unsigned int nbr_philo);
 t_philosopher	*launch_philos(t_program *program);
-
-/* time_utils.c */
-
-time_t	diff_mlsec(struct timeval t1, struct timeval t2);
-void	smart_sleep(unsigned int mlsec);
 
 /* display.c */
 
@@ -149,12 +148,13 @@ void		display_status(t_philosopher *philo, char *str);
 
 /* time_utils.c */
 
-time_t	get_mlsec_time(void);
-void		precise_sleep(uint64_t ms);
-int		philo_precise_sleep(t_philosopher *philo, time_t ms);
+time_t			get_mlsec_time(void);
+void			precise_sleep(uint64_t ms);
+int				philo_precise_sleep(t_philosopher *philo, time_t ms);
 
 /* master_thread.c */
 
-void	*master_routine(void *arg);
+bool			is_someone_died(t_mutex *mutex_simulation_stop);
+void			*supervisor_routine(void *arg);
 
 #endif

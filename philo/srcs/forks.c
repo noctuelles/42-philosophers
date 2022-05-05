@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 14:55:58 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/02 10:17:11 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/05 15:25:27 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,24 +57,16 @@ t_mutex	*create_forks(unsigned int nbr_philo)
 	return (forks);
 }
 
-/* lock_forks() lock all mutex. */
-
-void	lock_forks(t_mutex *forks, unsigned int nbr_philo)
+void	destroy_forks(t_mutex *forks, unsigned int nbr_philo)
 {
 	size_t	i;
 
 	i = 0;
 	while (i < nbr_philo)
-		pthread_mutex_lock(forks[i++].addr);
-}
-
-/* unlock_forks() unlock all mutex. */
-
-void	unlock_forks(t_mutex *forks, unsigned int nbr_philo)
-{
-	size_t	i;
-
-	i = 0;
-	while (i < nbr_philo)
-		pthread_mutex_unlock(forks[i++].addr);
+	{
+		pthread_mutex_destroy(forks[i].addr);
+		free(forks[i].addr);
+		i++;
+	}
+	free(forks);
 }

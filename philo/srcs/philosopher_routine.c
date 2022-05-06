@@ -6,7 +6,7 @@
 /*   By: plouvel <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/05 23:27:03 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/05 23:34:26 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/06 16:13:38 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ void	philo_eat(t_philosopher *philo)
 	philo_precise_sleep(philo, philo->time_to_eat);
 	pthread_mutex_lock(philo->mutex_eating.addr);
 	philo->time_of_death = get_mlsec_time() + philo->time_to_die;
+	philo->time_last_meal = get_mlsec_time();
 	philo->meal_ate += 1;
 	pthread_mutex_unlock(philo->mutex_eating.addr);
 	pthread_mutex_unlock(philo->fork[0].addr);

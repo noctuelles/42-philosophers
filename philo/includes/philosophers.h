@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/05 23:18:56 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/06 16:36:46 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,16 +25,10 @@
 
 # define STR_DF_NAME     "./philo"
 
-#ifndef SIMPLE
 # define STR_P           "\x1b[96m%-10lu\x1b[0m \x1b[93;1m%5u\x1b[0m \
 \x1b[1m%20s\x1b[0m\n"
 # define STR_P_DEAD      "\x1b[96m%-10lu\x1b[0m \x1b[93;1m%5u\x1b[0m \
 \x1b[1m%25s\x1b[0m\n"
-#else
-# define STR_P           "%lu %u %s\n"
-# define STR_P_DEAD      "\x1b[96m%-10lu\x1b[0m \x1b[93;1m%5u\x1b[0m \
-\x1b[1m%25s\x1b[0m\n"
-#endif
 
 # define STR_P_EATING    "is eating"
 # define STR_P_SLEEPING  "is sleeping"
@@ -66,9 +60,9 @@ philosophers reached.\n"
  *                              Typedef & Enum                                *
  *****************************************************************************/
 
-typedef struct s_philosopher t_philosopher;
+typedef struct s_philosopher	t_philosopher;
 
-typedef struct	e_mutex
+typedef struct e_mutex
 {
 	uint64_t			data;
 	pthread_mutex_t		*addr;
@@ -117,6 +111,7 @@ struct s_philosopher
 	t_mutex			*mutex_simulation_stop;
 	t_mutex			mutex_eating;
 	time_t			start_time;
+	time_t			time_last_meal;
 	time_t			time_of_death;
 	time_t			time_to_die;
 	time_t			time_to_eat;
@@ -136,8 +131,8 @@ void			*set_mutex(t_mutex *mutex, uint64_t value);
 
 /* forks.c */
 
-t_mutex	*create_forks(unsigned int nbr_philo);
-void	destroy_forks(t_mutex *forks, unsigned int nbr_philo);
+t_mutex			*create_forks(unsigned int nbr_philo);
+void			destroy_forks(t_mutex *forks, unsigned int nbr_philo);
 
 /* philosophers.c */
 
@@ -147,7 +142,7 @@ t_philosopher	*launch_philos(t_program *program);
 
 /* display.c */
 
-void		display_status(t_philosopher *philo, char *str);
+void			display_status(t_philosopher *philo, char *str);
 
 /* time_utils.c */
 

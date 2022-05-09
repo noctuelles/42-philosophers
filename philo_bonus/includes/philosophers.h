@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/09 20:24:19 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/09 21:39:06 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include <stdbool.h>
 # include <sys/time.h>
 # include <pthread.h>
-# include <stdio.h>
+# include <semaphore.h>
 # include <stdint.h>
 
 /******************************************************************************
@@ -43,7 +43,7 @@ unsigned integer.\n"
 # define STR_PHIL_OVERF  "error: bad argument (%u): maximum number of \
 philosophers reached.\n"
 # define STR_MALLOC      "fatal: system cannot allocate memory.\n"
-# define STR_MUTEX_ERR   "fatal: mutex: system cannot create mutex.\n"
+# define STR_SEM_ERR   "fatal: semaphore: system cannot create semaphore.\n"
 # define STR_PTHREAD_C   "fatal: thread: insufficient ressources or\
  system-imposed limit on the number of threads.\n"
 
@@ -54,26 +54,21 @@ philosophers reached.\n"
 
 # define PHILO_HARD_LIMIT 1000
 
+# define STR_SEM_FORKS     "semForks"
+# define STR_SEM_MSG_PRINT "semMsgPrint"
+
 /******************************************************************************
  *                              Typedef & Enum                                *
  *****************************************************************************/
 
 typedef struct s_philosopher	t_philosopher;
 
-typedef struct e_mutex
-{
-	uint64_t			data;
-	pthread_mutex_t		*addr;
-}				t_mutex;
-
 typedef struct s_program
 {
 	char			*name;
-	pthread_t		supervisor_thread;
-	t_mutex			*mutex_forks;
-	t_mutex			mutex_msg;
-	t_mutex			mutex_simulation_stop;
 	t_philosopher	*philos;
+	sem_t			*forks;
+	sem_t			*msg_print;
 	unsigned int	nbr_philo;
 	unsigned int	nbr_philo_must_eat;
 	unsigned int	time_to_die;
@@ -95,7 +90,7 @@ typedef enum e_err
 {
 	E_MALLOC = 0,
 	E_THREAD = 1,
-	E_MUTEX
+	E_SEM
 }				t_err;
 
 struct s_philosopher
@@ -103,11 +98,6 @@ struct s_philosopher
 	unsigned int	id;
 	unsigned int	meal_max;
 	unsigned int	meal_ate;
-	pthread_t		thread;
-	t_mutex			fork[2];
-	t_mutex			*mutex_msg;
-	t_mutex			*mutex_simulation_stop;
-	t_mutex			mutex_eating;
 	time_t			start_time;
 	time_t			time_of_death;
 	time_t			time_to_die;

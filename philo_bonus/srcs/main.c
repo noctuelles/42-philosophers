@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:14:34 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/05 23:33:21 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/09 22:01:38 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,15 @@
 #include <string.h>
 #include <limits.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <fcntl.h>
 
-static void	*quit(int err)
+static void	*quit(t_err err)
 {
 	if (err == E_MALLOC)
 		ft_putstr_fd(STR_MALLOC, STDERR_FILENO);
-	else if (err == E_MUTEX)
-		ft_putstr_fd(STR_MUTEX_ERR, STDERR_FILENO);
+	else if (err == E_SEM)
+		ft_putstr_fd(STR_SEM_ERR, STDERR_FILENO);
 	return (NULL);
 }
 
@@ -51,20 +53,21 @@ int	setup_program(t_program *program, int argc, char **argv)
 	return (0);
 }
 
-void	*create_global_mutex(t_program *program)
+void	*create_global_semaphore(t_program *program)
 {
-	program->mutex_msg.addr = malloc(sizeof(pthread_mutex_t));
-	if (program->mutex_msg.addr == NULL)
-		return (quit(E_MALLOC));
-	if (pthread_mutex_init(program->mutex_msg.addr, NULL) != 0)
-		return (quit(E_MUTEX));
-	program->mutex_simulation_stop.addr = malloc(sizeof(pthread_mutex_t));
-	if (program->mutex_simulation_stop.addr == NULL)
-		return (quit(E_MALLOC));
-	if (pthread_mutex_init(program->mutex_simulation_stop.addr, NULL) != 0)
-		return (quit(E_MUTEX));
-	program->mutex_simulation_stop.data = 0;
-	return (program);
+	program->forks = sem_open(STR_SEM_FORKS, O_CREAT | O_EXCL, 0644,
+		program->nbr_philo); 
+	if (program->forks == SEM_FAILED)
+		return (quit(E_SEM));
+	program->msg_print = sem_open(STR_SEM_MSG_PRINT, O_CREAT | O_EXCL, 0644,
+		1);
+	if (program->msg_print == SEM_FAILED)
+	{
+		sem_close(program->forks);
+		sem_unlink(STR_SEM_FORKS);
+		return (quit(E_SEM));
+	}
+	sem_unlink(STR_SEM_MSG_PRINT);
 }
 
 int	free_program(t_program *program, int ret)

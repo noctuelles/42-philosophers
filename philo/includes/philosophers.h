@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/06 16:36:46 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/09 20:24:19 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,6 @@
 # define STR_P_DIED      "\x1b[91mdied"
 # define STR_P_FORK      "has taken a fork"
 # define STR_P_THINKING  "is thinking"
-# define STR_NUL         ""
-# define NUL             0
 
 # define STR_NOT_DIGIT   "error: bad argument (%u): not a valid positive \
 unsigned integer.\n"
@@ -111,12 +109,10 @@ struct s_philosopher
 	t_mutex			*mutex_simulation_stop;
 	t_mutex			mutex_eating;
 	time_t			start_time;
-	time_t			time_last_meal;
 	time_t			time_of_death;
 	time_t			time_to_die;
 	time_t			time_to_eat;
 	time_t			time_to_sleep;
-	struct timeval	launch_time;
 };
 
 /******************************************************************************

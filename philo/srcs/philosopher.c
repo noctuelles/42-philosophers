@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 15:22:09 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/06 16:05:07 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/09 20:12:48 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,6 @@ t_philosopher	*create_philos(t_program *program)
 		if (pthread_mutex_init(philos[i].mutex_eating.addr, NULL) != 0)
 			return (quit_creation(philos, i, E_MUTEX));
 		philos[i].time_of_death = program->start_time + program->time_to_die;
-		philos[i].time_last_meal = program->start_time;
 		set_philo_misc(program, &philos[i], i);
 		i++;
 	}

@@ -6,7 +6,7 @@
 #    By: plouvel <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/05/06 16:28:09 by plouvel           #+#    #+#              #
-#    Updated: 2022/05/06 16:34:17 by plouvel          ###   ########.fr        #
+#    Updated: 2022/05/09 20:20:23 by plouvel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,13 +27,15 @@ SRCS		=	forks.c               \
 
 OBJS		=	$(addprefix $(OBJS_DIR)/, $(SRCS:.c=.o))
 
+DEPS		=	$(addprefix $(OBJS_DIR)/, $(SRCS:.c=.d))
+
 NAME		=	philo
 
 RM			=	rm -rf
 
 CC			=	cc
 
-CFLAGS		=	-Wall -Werror -Wextra -I $(INC_DIR)
+CFLAGS		=	-Wall -Werror -Wextra -MD -I $(INC_DIR)
 
 CLIBS		=	-lpthread
 
@@ -54,4 +56,6 @@ fclean:			clean
 
 re:				fclean all
 
-.PHONY:			all clean fclean re bonus
+-include $(DEPS)
+
+.PHONY:			all clean fclean re

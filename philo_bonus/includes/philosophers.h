@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/09 21:39:06 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/10 18:14:28 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ philosophers reached.\n"
 
 # define STR_SEM_FORKS     "semForks"
 # define STR_SEM_MSG_PRINT "semMsgPrint"
+# define STR_SEM_EAT       "semPhiloEat"
 
 /******************************************************************************
  *                              Typedef & Enum                                *
@@ -67,8 +68,8 @@ typedef struct s_program
 {
 	char			*name;
 	t_philosopher	*philos;
-	sem_t			*forks;
-	sem_t			*msg_print;
+	sem_t			*sem_forks;
+	sem_t			*sem_msg_print;
 	unsigned int	nbr_philo;
 	unsigned int	nbr_philo_must_eat;
 	unsigned int	time_to_die;
@@ -95,6 +96,11 @@ typedef enum e_err
 
 struct s_philosopher
 {
+	pid_t			pid;
+	sem_t			*sem_forks;
+	sem_t			*sem_msg_print;
+	sem_t			*sem_philo_stop;
+	const char		*sem_eat_name;
 	unsigned int	id;
 	unsigned int	meal_max;
 	unsigned int	meal_ate;
@@ -108,6 +114,8 @@ struct s_philosopher
 /******************************************************************************
  *                            Functions Prototype                             *
  *****************************************************************************/
+
+char	*ft_strcat(char *dest, const char *src);
 
 /* utils.c */
 

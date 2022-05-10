@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 15:22:09 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/09 20:12:48 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/10 18:32:44 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,8 @@
 static void	set_philo_misc(t_program *program, t_philosopher *philo,
 		size_t i)
 {
-	t_mutex	swap;
-
-	philo->mutex_msg = &program->mutex_msg;
-	philo->mutex_simulation_stop = &program->mutex_simulation_stop;
+	philo->sem_forks = program->sem_forks;
+	philo->sem_msg_print = program->sem_msg_print;
 	philo->start_time = program->start_time;
 	philo->id = i + 1;
 	philo->time_to_die = program->time_to_die;
@@ -29,20 +27,6 @@ static void	set_philo_misc(t_program *program, t_philosopher *philo,
 	philo->time_to_sleep = program->time_to_sleep;
 	philo->meal_max = program->nbr_philo_must_eat;
 	philo->meal_ate = 0;
-	philo->fork[0] = program->mutex_forks[i];
-	if (program->nbr_philo != 1)
-	{
-		if (i == program->nbr_philo - 1)
-			philo->fork[1] = program->mutex_forks[0];
-		else
-			philo->fork[1] = program->mutex_forks[i + 1];
-	}
-	if ((i + 1) % 2 != 0)
-	{
-		swap = philo->fork[0];
-		philo->fork[0] = philo->fork[1];
-		philo->fork[1] = swap;
-	}
 }
 
 static void	*quit_creation(t_philosopher *philos, size_t n, int err)
@@ -64,6 +48,36 @@ static void	*quit_creation(t_philosopher *philos, size_t n, int err)
 	return (NULL);
 }
 
+static const char	*get_philo_sem_name(unsigned int n)
+{
+	size_t	nbr_digit;
+	char	*sem_name;
+	size_t	i;
+
+	nbr_digit = 0;
+	i = n;
+	while (i)
+	{
+		nbr_digit++;
+		i /= 10;
+	}
+	sem_name = malloc((sizeof(STR_SEM_EAT) + nbr_digit) * sizeof(char));
+	if (sem_name == NULL)
+		return (NULL);
+	sem_name[0] = '\0';
+	ft_strcat(sem_name, STR_SEM_EAT);
+	i = sizeof(STR_SEM_EAT) - 2 + nbr_digit;
+ 	while (n % 10)
+	{
+		sem_name[i--] = (n % 10) + '0';
+		n /= 10;
+	}
+	sem_name[sizeof(STR_SEM_EAT) - 1 + nbr_digit] = '\0';
+	return ((const char *) sem_name);
+}
+
+const char	*build_philo_sem_name
+
 t_philosopher	*create_philos(t_program *program)
 {
 	size_t			i;
@@ -77,13 +91,9 @@ t_philosopher	*create_philos(t_program *program)
 	program->start_time = get_mlsec_time() + program->nbr_philo;
 	while (i < program->nbr_philo)
 	{
-		philos[i].mutex_eating.addr = malloc(sizeof(pthread_mutex_t));
-		if (philos[i].mutex_eating.addr == NULL)
-			return (quit_creation(philos, i, E_MALLOC));
-		if (pthread_mutex_init(philos[i].mutex_eating.addr, NULL) != 0)
-			return (quit_creation(philos, i, E_MUTEX));
-		philos[i].time_of_death = program->start_time + program->time_to_die;
-		set_philo_misc(program, &philos[i], i);
+		philos[i].sem_eat_name = get_philo_sem_name(i);
+		if (philos[i].sem_eat_name == NULL)
+			return (NULL);
 		i++;
 	}
 	return (philos);

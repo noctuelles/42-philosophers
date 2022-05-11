@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:23:50 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/09 20:16:26 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/11 18:13:13 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,12 @@ bool	is_digit(int c)
 		return (true);
 	else
 		return (false);
+}
+
+void	get_in_sync(time_t start_time)
+{
+	while (get_mlsec_time() < start_time)
+		usleep(100);
 }
 
 static size_t	ft_strlen(const char *s)
@@ -41,14 +47,6 @@ void	ft_putstr_fd(const char *s, int fd)
 	write(fd, s, ft_strlen(s));
 }
 
-void	*set_mutex(t_mutex *mutex, uint64_t value)
-{
-	pthread_mutex_lock(mutex->addr);
-	mutex->data = value;
-	pthread_mutex_unlock(mutex->addr);
-	return (NULL);
-}
-
 int	ft_strcmp(const char *s1, const char *s2)
 {
 	while (*s1 != '\0' && *s1 == *s2)
@@ -61,10 +59,10 @@ int	ft_strcmp(const char *s1, const char *s2)
 
 void	display_status(t_philosopher *philo, char *str)
 {
-	pthread_mutex_lock(philo->mutex_msg->addr);
-	pthread_mutex_lock (philo->mutex_simulation_stop->addr);
-	if (philo->mutex_simulation_stop->data != 1)
-		printf(STR_P, get_mlsec_time() - philo->start_time, philo->id, str);
-	pthread_mutex_unlock (philo->mutex_simulation_stop->addr);
-	pthread_mutex_unlock(philo->mutex_msg->addr);
+	time_t	curr_time;
+
+	sem_wait(philo->sem_msg_print);
+	curr_time = get_mlsec_time();
+	printf(STR_P, curr_time - philo->start_time, philo->id, str);
+	sem_post(philo->sem_msg_print);
 }

@@ -6,74 +6,62 @@
 /*   By: plouvel <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/03 12:25:26 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/09 20:16:17 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/11 18:35:11 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 #include <unistd.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-bool	is_someone_died(t_mutex *mutex_simulation_stop)
+int	cleanup(t_philosopher *philo, int ret_code)
 {
-	bool	ret;
-
-	ret = false;
-	pthread_mutex_lock(mutex_simulation_stop->addr);
-	if (mutex_simulation_stop->data == 1)
-		ret = true;
-	pthread_mutex_unlock(mutex_simulation_stop->addr);
-	return (ret);
+	if (philo->sem_forks)
+		sem_close(philo->sem_forks);
+	if (philo->sem_eat)
+		sem_close(philo->sem_eat);
+	if (philo->sem_msg_print)
+		sem_close(philo->sem_msg_print);
+	if (ret_code == PHILO_SEM_ERR)
+		ft_putstr_fd(STR_SEM_ERR, STDERR_FILENO);
+	else if (ret_code == PHILO_PTHREAD_ERR)
+		ft_putstr_fd(STR_PTHREAD_C, STDERR_FILENO);
+	exit(ret_code);
 }
 
-static bool	is_philo_dying(t_philosopher *philo)
+static inline void	drop_forks_n_leave(t_philosopher *philo)
 {
-	time_t	curr_time;
+	unsigned int nbr_forks = philo->nbr_fork_holding;
 
-	curr_time = get_mlsec_time();
-	if (curr_time >= philo->time_of_death)
-	{
-		set_mutex(philo->mutex_simulation_stop, 1);
-		pthread_mutex_lock(philo->mutex_msg->addr);
-		printf(STR_P_DEAD, curr_time - philo->start_time, philo->id,
-			STR_P_DIED);
-		pthread_mutex_unlock(philo->mutex_msg->addr);
-		pthread_mutex_unlock(philo->mutex_eating.addr);
-		return (true);
-	}
-	return (false);
-}
-
-void	ready_set_go(time_t start_time)
-{
-	while (get_mlsec_time() < start_time)
-		;
+	sem_post(philo->sem_eat);
+	if (nbr_forks >= 1)
+		sem_post(philo->sem_forks);
+	if (nbr_forks == 2)
+		sem_post(philo->sem_forks);
+	exit(cleanup(philo, PHILO_ATE_ENOUGH));
 }
 
 void	*supervisor_routine(void *arg)
 {
-	t_program		*program;
 	t_philosopher	*philo;
-	bool			everyone_ate_enough;
-	size_t			i;
 
-	program = (t_program *) arg;
-	ready_set_go(program->start_time);
+	philo = arg;
+	get_in_sync(philo->start_time);
 	while (true)
 	{
-		i = 0;
-		everyone_ate_enough = true;
-		while (i < program->nbr_philo)
+		sem_wait(philo->sem_eat);
+		if (get_mlsec_time() >= philo->time_of_death)
 		{
-			philo = &program->philos[i++];
-			pthread_mutex_lock(philo->mutex_eating.addr);
-			if (is_philo_dying(philo))
-				return (NULL);
-			if (philo->meal_ate < philo->meal_max)
-				everyone_ate_enough = false;
-			pthread_mutex_unlock(philo->mutex_eating.addr);
+			sem_wait(philo->sem_msg_print);
+			printf(STR_P_DEAD, get_mlsec_time() - philo->start_time, philo->id,
+				STR_P_DIED);
+			exit(cleanup(philo, PHILO_IS_DEAD));
 		}
-		if (everyone_ate_enough && philo->meal_max != 0)
-			return (set_mutex(philo->mutex_simulation_stop, 1));
+		//if (philo->meal_max && philo->meal_ate >= philo->meal_max)
+			//drop_forks_n_leave(philo);
+		sem_post(philo->sem_eat);
+		usleep(8000);
 	}
-	return (NULL);
 }

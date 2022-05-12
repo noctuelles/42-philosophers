@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 15:22:09 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/12 14:08:13 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 16:08:26 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,13 +57,13 @@ static const char	*get_philo_sem_name(const char *prefix, unsigned int n)
 		nbr_digit++;
 		i /= 10;
 	}
-	sem_name = malloc((sizeof(STR_SEM_EAT) + nbr_digit) * sizeof(char));
+	sem_name = malloc((ft_strlen(prefix) + nbr_digit + 1) * sizeof(char));
 	if (sem_name == NULL)
 		return (NULL);
 	sem_name[0] = '\0';
 	ft_strcat(sem_name, STR_SEM_EAT);
 	i = ft_strlen(prefix) - 1 + nbr_digit;
- 	while (n % 10)
+	while (n % 10)
 	{
 		sem_name[i--] = (n % 10) + '0';
 		n /= 10;

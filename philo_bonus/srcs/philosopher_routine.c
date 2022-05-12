@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: plouvel <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/05/05 23:27:03 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/12 14:19:46 by plouvel          ###   ########.fr       */
+/*   Created: 2022/05/12 14:24:58 by plouvel           #+#    #+#             */
+/*   Updated: 2022/05/12 16:06:40 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,47 +31,8 @@ static void	*quit_launch(t_program *program, int err, size_t n)
 		ft_putstr_fd(STR_FORK_ERR, STDERR_FILENO);
 	i = 0;
 	while (i < n)
-		kill(program->processes[i], SIGTERM);
+		kill(program->processes[i], SIGKILL);
 	return (NULL);
-}
-
-void	kill_them_all(t_program *program)
-{
-	size_t	i;
-
-	i = 0;
-	while (i < program->nbr_philo)
-		kill(program->processes[i++], SIGTERM);
-}
-
-void	philo_watchdog(t_program *program)
-{
-	size_t	i;
-	int		proc_ret;
-	int		ret_code;
-
-	get_in_sync(program->start_time);
-	while (1)
-	{
-		i = 0;
-		while (i < program->nbr_philo)
-		{
-			if (program->processes[i] &&
-					waitpid(program->processes[i], &proc_ret, WNOHANG) != 0)
-			{
-				if (WIFEXITED(proc_ret))
-				{
-					ret_code = WEXITSTATUS(proc_ret);
-					if (ret_code == PHILO_IS_DEAD)
-						return (kill_them_all(program));
-					if (ret_code == PHILO_ATE_ENOUGH)
-						program->processes[i] = 0;
-				}
-			}
-			i++;
-		}
-		usleep(100);
-	}
 }
 
 static inline void	philo_take_fork(t_philosopher *philo)
@@ -79,7 +40,7 @@ static inline void	philo_take_fork(t_philosopher *philo)
 	sem_wait(philo->sem_forks);
 	display_status(philo, STR_P_FORK);
 	sem_wait(philo->sem_eat);
-	philo->nbr_fork_holding += 1;;
+	philo->nbr_fork_holding += 1;
 	sem_post(philo->sem_eat);
 }
 
@@ -87,27 +48,27 @@ static inline void	philo_life_cycle(t_philosopher *philo)
 {
 	display_status(philo, STR_P_EATING);
 	precise_sleep(philo->time_to_eat);
+	sem_wait(philo->sem_eat);
 	philo->time_of_death = get_mlsec_time() + philo->time_to_die;
+	sem_post(philo->sem_eat);
 	display_status(philo, STR_P_SLEEPING);
 	sem_post(philo->sem_forks);
 	sem_post(philo->sem_forks);
 	sem_wait(philo->sem_eat);
 	philo->nbr_fork_holding -= 2;
+	philo->meal_ate += 1;
 	sem_post(philo->sem_eat);
 	precise_sleep(philo->time_to_sleep);
 }
 
-#include <stdio.h>
-
-void	philo_main(t_philosopher *philo)
+void	philo_main(t_program *program)
 {
-	philo_init_ipc(philo);
-	/* Process syncronisation */
+	t_philosopher	*philo;
 
+	philo = program->curr_philo;
+	philo_init_ipc(program, philo);
 	get_in_sync(philo->start_time);
-
-	/* Philo routine */
-	if (philo->nbr_philo != 1 && philo->id % 2 == 0)
+	if (philo->id % 2 == 0)
 		precise_sleep(philo->time_to_eat);
 	while (true)
 	{
@@ -135,9 +96,13 @@ t_philosopher	*launch_philos(t_program *program)
 			program->philos[i].pid = pid;
 		}
 		else if (pid == 0)
-			philo_main(&program->philos[i]);
+		{
+			program->curr_philo = &program->philos[i];
+			philo_main(program);
+		}
 		i++;
 	}
-	philo_watchdog(program);
+	if (philo_watchdog(program) == -1)
+		return (NULL);
 	return (program->philos);
 }

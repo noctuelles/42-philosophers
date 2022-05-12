@@ -6,7 +6,7 @@
 #    By: plouvel <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/05/06 16:28:09 by plouvel           #+#    #+#              #
-#    Updated: 2022/05/12 16:16:33 by plouvel          ###   ########.fr        #
+#    Updated: 2022/05/12 16:23:42 by plouvel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -64,6 +64,7 @@ re:				fclean all
 
 norm:
 				@$(NORMINETTE) $(FULL_SRCS)
+				@$(NORMINETTE) $(INC_DIR)
 
 -include $(DEPS)
 

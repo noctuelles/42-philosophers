@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/09 20:24:19 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 19:03:10 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,7 @@ struct s_philosopher
 	unsigned int	id;
 	unsigned int	meal_max;
 	unsigned int	meal_ate;
+	unsigned int	nbr_philo;
 	pthread_t		thread;
 	t_mutex			fork[2];
 	t_mutex			*mutex_msg;

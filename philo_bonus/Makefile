@@ -6,7 +6,7 @@
 #    By: plouvel <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/05/06 16:28:09 by plouvel           #+#    #+#              #
-#    Updated: 2022/05/12 16:23:42 by plouvel          ###   ########.fr        #
+#    Updated: 2022/05/12 18:12:20 by plouvel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,7 +41,7 @@ CC			=	cc
 
 NORMINETTE	=	norminette
 
-CFLAGS		=	-Wall -Wextra -Werror -MD -I  $(INC_DIR)
+CFLAGS		=	-Wall -Wextra -Werror -O2 -MD -I  $(INC_DIR)
 
 CLIBS		=	-lpthread
 

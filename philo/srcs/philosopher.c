@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 15:22:09 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/09 20:12:48 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 19:03:00 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,12 @@ static void	set_philo_misc(t_program *program, t_philosopher *philo,
 			philo->fork[1] = program->mutex_forks[0];
 		else
 			philo->fork[1] = program->mutex_forks[i + 1];
-	}
-	if ((i + 1) % 2 != 0)
-	{
-		swap = philo->fork[0];
-		philo->fork[0] = philo->fork[1];
-		philo->fork[1] = swap;
+		if ((i + 1) % 2 != 0)
+		{
+			swap = philo->fork[0];
+			philo->fork[0] = philo->fork[1];
+			philo->fork[1] = swap;
+		}
 	}
 }
 
@@ -83,6 +83,7 @@ t_philosopher	*create_philos(t_program *program)
 		if (pthread_mutex_init(philos[i].mutex_eating.addr, NULL) != 0)
 			return (quit_creation(philos, i, E_MUTEX));
 		philos[i].time_of_death = program->start_time + program->time_to_die;
+		philos[i].nbr_philo = program->nbr_philo;
 		set_philo_misc(program, &philos[i], i);
 		i++;
 	}

@@ -6,7 +6,7 @@
 #    By: plouvel <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/05/06 16:28:09 by plouvel           #+#    #+#              #
-#    Updated: 2022/05/11 18:45:49 by plouvel          ###   ########.fr        #
+#    Updated: 2022/05/12 19:02:15 by plouvel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,6 +25,8 @@ SRCS		=	forks.c               \
 				time_utils.c          \
 				utils.c
 
+SRCS_FULL	=	$(addprefix $(SRCS_DIR)/, $(SRCS))
+
 OBJS		=	$(addprefix $(OBJS_DIR)/, $(SRCS:.c=.o))
 
 DEPS		=	$(addprefix $(OBJS_DIR)/, $(SRCS:.c=.d))
@@ -35,7 +37,9 @@ RM			=	rm -rf
 
 CC			=	cc
 
-CFLAGS		=	-Wall -Werror -Wextra -O2 -MD -I $(INC_DIR)
+CFLAGS		=	-Wall -Werror -Wextra -g3 -fsanitize=thread -MD -I $(INC_DIR)
+
+NORMINETTE	=	norminette
 
 CLIBS		=	-lpthread
 
@@ -56,6 +60,10 @@ fclean:			clean
 
 re:				fclean all
 
+norm:
+				@$(NORMINETTE) $(SRCS_FULL)
+				@$(NORMINETTE) $(INC_DIR)
+
 -include $(DEPS)
 
-.PHONY:			all clean fclean re
+.PHONY:			all clean fclean re norm 

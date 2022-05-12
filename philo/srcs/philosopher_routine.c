@@ -6,7 +6,7 @@
 /*   By: plouvel <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/05 23:27:03 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/09 20:24:15 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 19:02:59 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,26 @@ void	philo_eat(t_philosopher *philo)
 	pthread_mutex_unlock(philo->fork[1].addr);
 }
 
+static void	*one_philo_routine(t_philosopher *philo)
+{
+	pthread_mutex_lock(philo->fork[0].addr);
+	printf(STR_P, get_mlsec_time() - philo->start_time, philo->id,
+		STR_P_FORK);
+	precise_sleep(philo->time_to_die);
+	printf(STR_P_DEAD, get_mlsec_time() - philo->start_time, philo->id,
+		STR_P_DIED);
+	pthread_mutex_unlock(philo->fork[0].addr);
+	return (NULL);
+}
+
 void	*philo_routine(void *arg)
 {
 	t_philosopher	*philo;
 
 	philo = (t_philosopher *) arg;
 	ready_set_go(philo->start_time);
+	if (philo->nbr_philo == 1)
+		return (one_philo_routine(philo));
 	if (philo->id % 2 == 0)
 		philo_precise_sleep(philo, philo->time_to_eat);
 	while (is_someone_died(philo->mutex_simulation_stop) == false)
@@ -74,10 +88,13 @@ t_philosopher	*launch_philos(t_program *program)
 			return (quit_launch(program, E_THREAD, i));
 		i++;
 	}
-	if (pthread_create(&program->supervisor_thread, NULL, &supervisor_routine,
-			program) != 0)
-		return (quit_launch(program, E_THREAD, i));
-	pthread_detach(program->supervisor_thread);
+	if (program->nbr_philo != 1)
+	{
+		if (pthread_create(&program->supervisor_thread, NULL,
+				&supervisor_routine, program) != 0)
+			return (quit_launch(program, E_THREAD, i));
+		pthread_detach(program->supervisor_thread);
+	}
 	i = 0;
 	while (i < program->nbr_philo)
 		pthread_join(program->philos[i++].thread, NULL);

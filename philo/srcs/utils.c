@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:23:50 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/09 20:16:26 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 19:03:02 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,16 +47,6 @@ void	*set_mutex(t_mutex *mutex, uint64_t value)
 	mutex->data = value;
 	pthread_mutex_unlock(mutex->addr);
 	return (NULL);
-}
-
-int	ft_strcmp(const char *s1, const char *s2)
-{
-	while (*s1 != '\0' && *s1 == *s2)
-	{
-		s1++;
-		s2++;
-	}
-	return (*(unsigned char *)s1 - *(unsigned char *)s2);
 }
 
 void	display_status(t_philosopher *philo, char *str)

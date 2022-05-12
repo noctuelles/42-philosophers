@@ -6,7 +6,7 @@
 /*   By: plouvel <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/03 12:25:26 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/11 18:35:11 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 12:06:46 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,8 @@ void	*supervisor_routine(void *arg)
 				STR_P_DIED);
 			exit(cleanup(philo, PHILO_IS_DEAD));
 		}
-		//if (philo->meal_max && philo->meal_ate >= philo->meal_max)
-			//drop_forks_n_leave(philo);
+		if (philo->meal_max && philo->meal_ate >= philo->meal_max)
+			drop_forks_n_leave(philo);
 		sem_post(philo->sem_eat);
 		usleep(8000);
 	}

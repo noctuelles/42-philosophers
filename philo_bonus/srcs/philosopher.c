@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 15:22:09 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/11 18:02:48 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 14:08:13 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ static void	*quit_creation(t_philosopher *philos, size_t n, int err)
 	return (NULL);
 }
 
-static const char	*get_philo_sem_name(unsigned int n)
+static const char	*get_philo_sem_name(const char *prefix, unsigned int n)
 {
 	size_t	nbr_digit;
 	char	*sem_name;
@@ -62,13 +62,13 @@ static const char	*get_philo_sem_name(unsigned int n)
 		return (NULL);
 	sem_name[0] = '\0';
 	ft_strcat(sem_name, STR_SEM_EAT);
-	i = sizeof(STR_SEM_EAT) - 2 + nbr_digit;
+	i = ft_strlen(prefix) - 1 + nbr_digit;
  	while (n % 10)
 	{
 		sem_name[i--] = (n % 10) + '0';
 		n /= 10;
 	}
-	sem_name[sizeof(STR_SEM_EAT) - 1 + nbr_digit] = '\0';
+	sem_name[ft_strlen(prefix) + nbr_digit] = '\0';
 	return ((const char *) sem_name);
 }
 
@@ -81,11 +81,11 @@ t_philosopher	*create_philos(t_program *program)
 	if (!philos)
 		return (quit_creation(philos, 0, E_MALLOC));
 	i = 0;
-	program->start_time = get_mlsec_time() + 100 + program->nbr_philo;
+	program->start_time = get_mlsec_time() + 100 + program->nbr_philo * 2;
 	while (i < program->nbr_philo)
 	{
 		memset(&philos[i], 0, sizeof(t_philosopher));
-		philos[i].sem_eat_name = get_philo_sem_name(i + 1);
+		philos[i].sem_eat_name = get_philo_sem_name(STR_SEM_EAT, i + 1);
 		if (philos[i].sem_eat_name == NULL)
 			return (quit_creation(philos, i, E_MALLOC));
 		set_philo_misc(program, &philos[i], i);

@@ -6,7 +6,7 @@
 #    By: plouvel <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/05/06 16:28:09 by plouvel           #+#    #+#              #
-#    Updated: 2022/05/09 20:20:23 by plouvel          ###   ########.fr        #
+#    Updated: 2022/05/11 18:45:49 by plouvel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,7 +35,7 @@ RM			=	rm -rf
 
 CC			=	cc
 
-CFLAGS		=	-Wall -Werror -Wextra -MD -I $(INC_DIR)
+CFLAGS		=	-Wall -Werror -Wextra -O2 -MD -I $(INC_DIR)
 
 CLIBS		=	-lpthread
 

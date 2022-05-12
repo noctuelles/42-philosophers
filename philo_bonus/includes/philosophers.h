@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/11 16:54:36 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 14:08:23 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,9 @@ struct s_philosopher
 	sem_t			*sem_forks;
 	sem_t			*sem_msg_print;
 	sem_t			*sem_eat;
+	sem_t			*sem_forks_taken;
 	const char		*sem_eat_name;
+	const char		*sem_forks_taken_name; 
 	unsigned int	nbr_philo;
 	unsigned int	nbr_fork_holding;
 	unsigned int	id;
@@ -141,6 +143,8 @@ t_philosopher	*create_philos(t_program *program);
 void			destroy_philos(t_philosopher *philos, unsigned int nbr_philo);
 t_philosopher	*launch_philos(t_program *program);
 
+void	philo_init_ipc(t_philosopher *philo);
+
 /* display.c */
 
 void			display_status(t_philosopher *philo, char *str);
@@ -162,4 +166,7 @@ size_t			check_arguments(int argc, char **argv);
 size_t			parse_arguments(t_program *program, int argc, char **argv);
 
 int	cleanup(t_philosopher *philo, int ret_code);
+
+size_t	ft_strlen(const char *s);
+
 #endif

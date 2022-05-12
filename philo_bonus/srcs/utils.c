@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:23:50 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/11 18:13:13 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 14:05:19 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,10 @@ bool	is_digit(int c)
 void	get_in_sync(time_t start_time)
 {
 	while (get_mlsec_time() < start_time)
-		usleep(100);
+		;
 }
 
-static size_t	ft_strlen(const char *s)
+size_t	ft_strlen(const char *s)
 {
 	size_t	i;
 

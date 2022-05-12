@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:14:34 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/11 17:52:29 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 14:08:51 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,11 +64,11 @@ int	setup_program(t_program *program, int argc, char **argv)
 void	*create_global_semaphore(t_program *program)
 {
 	sem_unlink(STR_SEM_FORKS);
+	sem_unlink(STR_SEM_MSG_PRINT);
 	program->sem_forks = sem_open(STR_SEM_FORKS, O_CREAT,
 		S_IRUSR | S_IWUSR, program->nbr_philo); 
 	if (program->sem_forks == SEM_FAILED)
 		return (quit(program, E_SEM));
-	sem_unlink(STR_SEM_MSG_PRINT);
 	program->sem_msg_print = sem_open(STR_SEM_MSG_PRINT, O_CREAT,
 		S_IRUSR | S_IWUSR, 1);
 	if (program->sem_msg_print == SEM_FAILED)
@@ -99,6 +99,7 @@ int	main(int argc, char **argv)
 	program.philos = create_philos(&program);
 	if (!program.philos)
 		return (1);
+
 	if (!launch_philos(&program))
 		return (free_program(&program, 1));
 	return (free_program(&program, 0));

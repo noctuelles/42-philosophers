@@ -6,7 +6,7 @@
 /*   By: plouvel <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/05 23:27:03 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/11 18:42:58 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 14:19:46 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,9 @@ static inline void	philo_take_fork(t_philosopher *philo)
 {
 	sem_wait(philo->sem_forks);
 	display_status(philo, STR_P_FORK);
+	sem_wait(philo->sem_eat);
+	philo->nbr_fork_holding += 1;;
+	sem_post(philo->sem_eat);
 }
 
 static inline void	philo_life_cycle(t_philosopher *philo)
@@ -88,8 +91,13 @@ static inline void	philo_life_cycle(t_philosopher *philo)
 	display_status(philo, STR_P_SLEEPING);
 	sem_post(philo->sem_forks);
 	sem_post(philo->sem_forks);
+	sem_wait(philo->sem_eat);
+	philo->nbr_fork_holding -= 2;
+	sem_post(philo->sem_eat);
 	precise_sleep(philo->time_to_sleep);
 }
+
+#include <stdio.h>
 
 void	philo_main(t_philosopher *philo)
 {
@@ -99,7 +107,7 @@ void	philo_main(t_philosopher *philo)
 	get_in_sync(philo->start_time);
 
 	/* Philo routine */
-	if (philo->id % 2 == 0)
+	if (philo->nbr_philo != 1 && philo->id % 2 == 0)
 		precise_sleep(philo->time_to_eat);
 	while (true)
 	{

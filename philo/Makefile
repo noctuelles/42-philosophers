@@ -6,7 +6,7 @@
 #    By: plouvel <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/05/06 16:28:09 by plouvel           #+#    #+#              #
-#    Updated: 2022/05/12 19:02:15 by plouvel          ###   ########.fr        #
+#    Updated: 2022/05/12 19:12:36 by plouvel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,7 +37,7 @@ RM			=	rm -rf
 
 CC			=	cc
 
-CFLAGS		=	-Wall -Werror -Wextra -g3 -fsanitize=thread -MD -I $(INC_DIR)
+CFLAGS		=	-Wall -Werror -Wextra -MD -I $(INC_DIR)
 
 NORMINETTE	=	norminette
 

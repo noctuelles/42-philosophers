@@ -6,7 +6,7 @@
 /*   By: plouvel <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/03 12:25:26 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/12 19:16:21 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 23:49:03 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ static bool	is_philo_dying(t_philosopher *philo)
 	time_t	curr_time;
 
 	curr_time = get_mlsec_time();
-	if (curr_time >= philo->time_of_death)
+	if (curr_time > philo->time_of_death)
 	{
 		set_mutex(philo->mutex_simulation_stop, 1);
 		pthread_mutex_lock(philo->mutex_msg->addr);

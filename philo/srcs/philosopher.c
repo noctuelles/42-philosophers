@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 15:22:09 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/12 19:16:14 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 23:49:15 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ static void	set_philo_misc(t_program *program, t_philosopher *philo,
 			philo->fork[1] = program->mutex_forks[0];
 		else
 			philo->fork[1] = program->mutex_forks[i + 1];
-		if ((i + 1) % 2 != 0)
+		if (i == 0)
 		{
 			swap = philo->fork[0];
 			philo->fork[0] = philo->fork[1];

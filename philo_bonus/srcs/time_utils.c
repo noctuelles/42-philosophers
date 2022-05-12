@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 19:45:02 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/11 13:57:29 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 16:12:45 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,16 +28,4 @@ void	precise_sleep(uint64_t ms)
 	wake_up_time = get_mlsec_time() + ms;
 	while (get_mlsec_time() < wake_up_time)
 		usleep(100);
-}
-
-int	philo_precise_sleep(t_philosopher *philo, time_t ms)
-{
-	time_t	wake_up_time;
-
-	wake_up_time = get_mlsec_time() + ms;
-	while (get_mlsec_time() < wake_up_time)
-	{
-		usleep(100);
-	}
-	return (0);
 }

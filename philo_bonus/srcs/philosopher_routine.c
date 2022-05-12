@@ -6,7 +6,7 @@
 /*   By: plouvel <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/12 14:24:58 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/12 16:06:40 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 16:21:24 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ static inline void	philo_life_cycle(t_philosopher *philo)
 	precise_sleep(philo->time_to_sleep);
 }
 
-void	philo_main(t_program *program)
+static void	philo_main(t_program *program)
 {
 	t_philosopher	*philo;
 

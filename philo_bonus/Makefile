@@ -6,7 +6,7 @@
 #    By: plouvel <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/05/06 16:28:09 by plouvel           #+#    #+#              #
-#    Updated: 2022/05/12 16:09:47 by plouvel          ###   ########.fr        #
+#    Updated: 2022/05/12 16:16:33 by plouvel          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,6 +27,8 @@ SRCS		=	main.c							\
 				string.c						\
 				utils.c
 
+FULL_SRCS	=	$(addprefix $(SRCS_DIR)/, $(SRCS))
+
 OBJS		=	$(addprefix $(OBJS_DIR)/, $(SRCS:.c=.o))
 
 DEPS		=	$(addprefix $(OBJS_DIR)/, $(SRCS:.c=.d))
@@ -39,7 +41,7 @@ CC			=	cc
 
 NORMINETTE	=	norminette
 
-CFLAGS		=	-MD -g3 -fsanitize=thread -I  $(INC_DIR)
+CFLAGS		=	-Wall -Wextra -Werror -MD -I  $(INC_DIR)
 
 CLIBS		=	-lpthread
 
@@ -60,6 +62,9 @@ fclean:			clean
 
 re:				fclean all
 
+norm:
+				@$(NORMINETTE) $(FULL_SRCS)
+
 -include $(DEPS)
 
-.PHONY:			all clean fclean re
+.PHONY:			all clean fclean re norm

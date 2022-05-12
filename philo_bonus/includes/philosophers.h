@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 15:38:20 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/12 14:08:23 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/12 16:22:48 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ typedef struct s_philosopher	t_philosopher;
 typedef struct s_program
 {
 	char			*name;
+	t_philosopher	*curr_philo;
 	t_philosopher	*philos;
 	pid_t			*processes;
 	sem_t			*sem_forks;
@@ -110,9 +111,7 @@ struct s_philosopher
 	sem_t			*sem_forks;
 	sem_t			*sem_msg_print;
 	sem_t			*sem_eat;
-	sem_t			*sem_forks_taken;
 	const char		*sem_eat_name;
-	const char		*sem_forks_taken_name; 
 	unsigned int	nbr_philo;
 	unsigned int	nbr_fork_holding;
 	unsigned int	id;
@@ -129,21 +128,29 @@ struct s_philosopher
  *                            Functions Prototype                             *
  *****************************************************************************/
 
-char	*ft_strcat(char *dest, const char *src);
-
 /* utils.c */
 
 bool			is_digit(int c);
+void			get_in_sync(time_t start_time);
 void			ft_putstr_fd(const char *s, int fd);
-void	get_in_sync(time_t start_time);
+
+/* string.c */
+
+char			*ft_strcat(char *dest, const char *src);
+size_t			ft_strlen(const char *s);
 
 /* philosophers.c */
 
 t_philosopher	*create_philos(t_program *program);
 void			destroy_philos(t_philosopher *philos, unsigned int nbr_philo);
+
+/* philosophers_routine.c */
+
 t_philosopher	*launch_philos(t_program *program);
 
-void	philo_init_ipc(t_philosopher *philo);
+/* philosophers_routine_utils.c */
+
+void			philo_init_ipc(t_program *program, t_philosopher *philo);
 
 /* display.c */
 
@@ -153,20 +160,22 @@ void			display_status(t_philosopher *philo, char *str);
 
 time_t			get_mlsec_time(void);
 void			precise_sleep(uint64_t ms);
-int				philo_precise_sleep(t_philosopher *philo, time_t ms);
 
 /* supervisor.c */
 
-void			ready_set_go(time_t start_time);
+int				philo_watchdog(t_program *program);
 void			*supervisor_routine(void *arg);
+int				cleanup(t_program *program, t_philosopher *philo,
+					int ret_code);
+
+/* supervisor_utils.c */
+
+bool			can_continue_simulation(t_program *program);
+int				kill_them_all(t_program *program, int ret_code);
 
 /* parsing.c */
 
 size_t			check_arguments(int argc, char **argv);
 size_t			parse_arguments(t_program *program, int argc, char **argv);
-
-int	cleanup(t_philosopher *philo, int ret_code);
-
-size_t	ft_strlen(const char *s);
 
 #endif

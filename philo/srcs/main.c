@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 11:14:34 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/05 23:33:21 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/14 18:46:37 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ int	main(int argc, char **argv)
 		return (1);
 	program.philos = create_philos(&program);
 	if (!program.philos)
-		return (1);
+		return (free_program(&program, 1));
 	if (!create_global_mutex(&program))
 		return (free_program(&program, 1));
 	if (!launch_philos(&program))

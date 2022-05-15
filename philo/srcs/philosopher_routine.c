@@ -6,7 +6,7 @@
 /*   By: plouvel <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/05 23:27:03 by plouvel           #+#    #+#             */
-/*   Updated: 2022/05/12 23:49:24 by plouvel          ###   ########.fr       */
+/*   Updated: 2022/05/15 12:01:20 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void	*philo_routine(void *arg)
 	ready_set_go(philo->start_time);
 	if (philo->nbr_philo == 1)
 		return (one_philo_routine(philo));
-	if (philo->id % 2)
+	else if (philo->id % 2)
 		philo_precise_sleep(philo, philo->time_to_eat);
 	while (is_someone_died(philo->mutex_simulation_stop) == false)
 	{
